@@ -45,29 +45,29 @@ fn start(mut commands: Commands) {
         let x = -300 + 64 * x;
         commands.spawn((
             Collider::default(),
-            Size::new(64.0, 64.0),
-            Position::new_f32(x as f32, 0.0),
+            Size::new_f32(64.0, 64.0, 0.0),
+            Position::new_f32(x as f32, 0.0, 0.0),
         ));
     }
 
     commands.spawn((
         Collider::default(),
-        Size::new(64.0, 64.0),
-        Position::new_f32(-64.0, 64.0),
+        Size::new_f32(64.0, 64.0, 0.0),
+        Position::new_f32(-64.0, 64.0, 0.0),
     ));
 
     commands
         .spawn((
             PlayerMarker,
             Collider::default(),
-            Size::new(128.0, 128.0),
-            Position::new_f32(0.0, 1000.0),
+            Size::new_f32(128.0, 128.0, 0.0),
+            Position::new_f32(0.0, 1000.0, 0.0),
             Name::new("Player-Gameplay"),
         ))
         .with_children(|parent| {
             parent.spawn((
                 Position::default(),
-                Size::new(64.0, 64.0),
+                Size::new_f32(64.0, 64.0, 0.0),
                 TestMarker,
                 Name::new("Test"),
             ));
