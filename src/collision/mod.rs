@@ -1,5 +1,3 @@
-#![allow(clippy::missing_panics_doc)]
-
 mod aabb;
 mod substep;
 pub mod tilemap_backend;
@@ -201,8 +199,8 @@ fn trigger_enter(
         CollisionSide::Bottom => position.y = other_rect.max.y,
         CollisionSide::Top => position.y = other_rect.min.y - rect.h(),
 
-        CollisionSide::Front => position.z = other_rect.max.z,
-        CollisionSide::Back => position.z = other_rect.min.z - rect.d(),
+        CollisionSide::Back => position.z = other_rect.max.z,
+        CollisionSide::Front => position.z = other_rect.min.z - rect.d(),
     }
 }
 
@@ -238,8 +236,8 @@ fn trigger_stay(
         CollisionSide::Bottom => position.y += offset,
         CollisionSide::Top => position.y -= offset,
 
-        CollisionSide::Back => position.z += offset,
-        CollisionSide::Front => position.z -= offset,
+        CollisionSide::Back => position.z -= offset,
+        CollisionSide::Front => position.z += offset,
     }
     //println!("[{side:?}] Rigidbody velocity: {:?}", rigid_body.velocity);
 }

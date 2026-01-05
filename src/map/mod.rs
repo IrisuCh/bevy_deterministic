@@ -1,13 +1,12 @@
 mod chunk;
 
+use crate::determinism::transform::{Position, Size};
 use bevy::prelude::*;
 use fixed::types::I32F32;
 use serde::{Deserialize, Serialize};
-use crate::determinism::transform::Size;
-use crate::transform::Position;
 
+use crate::collision::Collider;
 pub use chunk::*;
-use crate::collision::{Collider};
 
 #[derive(Component, Reflect)]
 pub struct TilemapSize {
@@ -87,34 +86,33 @@ impl TilemapStorage {
         position: TilePosition,
         index: TileIndex,
         map: Entity,
-        commands: &mut Commands
+        commands: &mut Commands,
     ) {
         let pos = position.y as usize * width + position.x as usize;
         if self.0[pos].is_some() {
             panic!("Tile at {}, {} already exist", position.x, position.y);
         }
 
-        let tile = commands.spawn(
-            (
+        let tile = commands
+            .spawn((
                 position,
                 index,
                 ChildOf(map),
                 Position::default(),
                 Size::default(),
                 Name::new("Tile"),
-            )
-        ).id();
+            ))
+            .id();
 
         self.0[pos] = Some(tile);
     }
 }
 
-
 pub fn set_tiles_position(
     storages: Query<(&TileSize, &TilePadding), With<TilemapStorage>>,
     tiles: Query<
         (&mut Position, &mut Size, &TilePosition, &ChildOf),
-        Or<(Changed<Position>, Changed<TilePosition>, Changed<Size>)>
+        Or<(Changed<Position>, Changed<TilePosition>, Changed<Size>)>,
     >,
 ) {
     for (mut pos, mut size, tile_pos, parent) in tiles {
@@ -130,10 +128,7 @@ pub trait OnChunkSpawn {
     fn on_chunk_spawn(commands: &mut Commands, entity: Entity);
 }
 
-pub fn on_chunk_spawn<T: OnChunkSpawn>(
-    mut commands: Commands,
-    query: Query<Entity, Added<Chunk>>
-) {
+pub fn on_chunk_spawn<T: OnChunkSpawn>(mut commands: Commands, query: Query<Entity, Added<Chunk>>) {
     for entity in query {
         T::on_chunk_spawn(&mut commands, entity);
     }

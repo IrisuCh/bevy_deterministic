@@ -5,7 +5,10 @@ pub struct SimulationInputPlugin;
 
 impl Plugin for SimulationInputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, (update_world_mouse_position, make_input_snapshot));
+        app.add_systems(
+            PreUpdate,
+            (update_world_mouse_position, make_input_snapshot),
+        );
     }
 }
 
@@ -16,15 +19,19 @@ pub struct WorldMousePosition {
 }
 
 impl WorldMousePosition {
-    pub const fn x(&self) -> I32F32 { self.x }
-    pub const fn y(&self) -> I32F32 { self.y }
+    pub const fn x(&self) -> I32F32 {
+        self.x
+    }
+    pub const fn y(&self) -> I32F32 {
+        self.y
+    }
 }
 
 fn update_world_mouse_position(
     mut res: ResMut<WorldMousePosition>,
     window: Single<&Window>,
     mut last_cursor_pos: Local<Option<Vec2>>,
-    camera: Single<(&Camera, &GlobalTransform), With<Camera2d>>,
+    camera: Single<(&Camera, &GlobalTransform)>,
 ) {
     let (camera, camera_transform) = camera.into_inner();
 
@@ -57,13 +64,15 @@ pub struct InputSnapshot {
 }
 
 impl InputSnapshot {
-    pub const fn inner(&self) -> &[Action] { self.inner.as_slice() }
+    pub const fn inner(&self) -> &[Action] {
+        self.inner.as_slice()
+    }
 }
 
 fn make_input_snapshot(
     mut snapshot: ResMut<InputSnapshot>,
     mouse: Res<ButtonInput<MouseButton>>,
-    keys: Res<ButtonInput<KeyCode>>
+    keys: Res<ButtonInput<KeyCode>>,
 ) {
     snapshot.inner.clear();
     if keys.just_pressed(KeyCode::KeyZ) {

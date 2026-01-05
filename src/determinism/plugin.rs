@@ -45,14 +45,14 @@ fn start(mut commands: Commands) {
         let x = -300 + 64 * x;
         commands.spawn((
             Collider::default(),
-            Size::new_f32(64.0, 64.0, 0.0),
+            Size::new_f32(64.0, 64.0, 64.0),
             Position::new_f32(x as f32, 0.0, 0.0),
         ));
     }
 
     commands.spawn((
         Collider::default(),
-        Size::new_f32(64.0, 64.0, 0.0),
+        Size::new_f32(64.0, 64.0, 64.0),
         Position::new_f32(-64.0, 64.0, 0.0),
     ));
 
@@ -60,14 +60,14 @@ fn start(mut commands: Commands) {
         .spawn((
             PlayerMarker,
             Collider::default(),
-            Size::new_f32(128.0, 128.0, 0.0),
+            Size::new_f32(128.0, 128.0, 128.0),
             Position::new_f32(0.0, 1000.0, 0.0),
             Name::new("Player-Gameplay"),
         ))
         .with_children(|parent| {
             parent.spawn((
-                Position::default(),
-                Size::new_f32(64.0, 64.0, 0.0),
+                Position::new_f32(0.0, 0.0, 128.0),
+                Size::new_f32(64.0, 64.0, 64.0),
                 TestMarker,
                 Name::new("Test"),
             ));
@@ -78,8 +78,6 @@ fn start(mut commands: Commands) {
     let tile_size = TileSize::new(10.0, 10.0);
     let map_size = TilemapSize::new(10, 10);
     let mut storage = TilemapStorage::new(&map_size);
-
-
 
     for x in 3..8 {
         for y in 3..8 {
@@ -106,11 +104,13 @@ fn apply_player_movement(
     player: Single<(&mut Position, &mut KinematicRigidBody), With<PlayerMarker>>,
 ) {
     let (mut position, mut rigid_body) = player.into_inner();
+    println!("Player position: {position:?}");
     for action in input.inner() {
         match action {
             Action::Click => {
                 position.x = mouse_pos.x();
                 position.y = mouse_pos.y();
+                position.z = I32F32::ZERO;
                 rigid_body.velocity.y = I32F32::ZERO;
             }
             Action::Jump => rigid_body.velocity.y = I32F32::from_num(6.0),
@@ -129,6 +129,7 @@ fn update_entity_movement(
     for (mut position, mut rigid_body) in &mut entities {
         position.x += rigid_body.velocity.x;
         position.y += rigid_body.velocity.y;
+        position.z += rigid_body.velocity.z;
         rigid_body.velocity.y -= I32F32::from_num(10.0 * time.delta_secs());
     }
 }

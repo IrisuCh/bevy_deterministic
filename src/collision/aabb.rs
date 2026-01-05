@@ -1,4 +1,4 @@
-use crate::determinism::transform::{GlobalPosition, Position, Size};
+use crate::determinism::transform::{Position, Size};
 use fixed::types::I32F32;
 
 #[derive(Debug, Clone, Copy)]

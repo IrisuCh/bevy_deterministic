@@ -47,7 +47,7 @@ impl<'a> SubstepIterator<'a> {
     }
 }
 
-impl<'a> Iterator for SubstepIterator<'a> {
+impl Iterator for SubstepIterator<'_> {
     type Item = Aabb;
 
     fn next(&mut self) -> Option<Self::Item> {
