@@ -32,9 +32,7 @@ pub struct CollisionExit {
 
 #[derive(Component, Reflect, Debug, Default)]
 #[require(Position)]
-pub struct Collider {
-    pub(crate) enter: bool,
-}
+pub struct Collider;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Reflect, EnumCount)]
 pub enum CollisionSide {
@@ -104,10 +102,10 @@ fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
 pub fn apply_physics(
     mut commands: Commands,
     transform: Query<(Entity, &GlobalPosition, &Size), With<Collider>>,
-    dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody, &mut Collider)>,
+    dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
     mut positions: Query<&mut Position>,
 ) {
-    for (current, mut rigid_body, mut collider) in dynamic_rigid_body {
+    for (current, mut rigid_body) in dynamic_rigid_body {
         let (_, position, size) = transform.get(current).unwrap();
         let mut iter = SubstepIterator::new(
             position,
@@ -127,9 +125,6 @@ pub fn apply_physics(
                 if rigid_body.remove_other(other) {
                     trigger_exit(current, other, &mut commands);
                 }
-                if rigid_body.is_history_empty() {
-                    collider.enter = false;
-                }
                 continue;
             };
 
@@ -146,7 +141,6 @@ pub fn apply_physics(
                 );
             } else {
                 rigid_body.insert_other(other, side);
-                collider.enter = true;
                 trigger_enter(
                     current,
                     side,

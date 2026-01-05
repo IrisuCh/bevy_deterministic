@@ -34,7 +34,6 @@ fn sync_transform(
 
         // Сдвигаем позицию к центру
         transform.translation = position.as_vec3() + size.as_vec3() / 2.0;
-        //transform.translation = position.as_vec3();
         transform.scale = size.as_vec3();
     }
 }

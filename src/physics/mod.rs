@@ -17,32 +17,32 @@ pub struct Velocity {
 
 impl Velocity {
     /// MIN..0
-    pub fn clamp_negative_x(&mut self) {
+    pub(crate) fn clamp_negative_x(&mut self) {
         self.x = self.x.clamp(I32F32::MIN, I32F32::ZERO);
     }
 
     /// MIN..0
-    pub fn clamp_negative_y(&mut self) {
+    pub(crate) fn clamp_negative_y(&mut self) {
         self.y = self.y.clamp(I32F32::MIN, I32F32::ZERO);
     }
 
     /// MIN..0
-    pub fn clamp_negative_z(&mut self) {
+    pub(crate) fn clamp_negative_z(&mut self) {
         self.z = self.z.clamp(I32F32::MIN, I32F32::ZERO);
     }
 
     /// 0..MAX
-    pub fn clamp_positive_x(&mut self) {
+    pub(crate) fn clamp_positive_x(&mut self) {
         self.x = self.x.clamp(I32F32::ZERO, I32F32::MAX);
     }
 
     /// 0..MAX
-    pub fn clamp_positive_y(&mut self) {
+    pub(crate) fn clamp_positive_y(&mut self) {
         self.y = self.y.clamp(I32F32::ZERO, I32F32::MAX);
     }
 
     /// 0..MAX
-    pub fn clamp_positive_z(&mut self) {
+    pub(crate) fn clamp_positive_z(&mut self) {
         self.z = self.z.clamp(I32F32::ZERO, I32F32::MAX);
     }
 }
@@ -97,11 +97,7 @@ impl KinematicRigidBody {
         self.offset_state |= side as usize;
     }
 
-    pub(crate) fn is_offset_applied(&self, side: CollisionSide) -> bool {
-        println!(
-            "Checking offset state for side {side:?}, count: {:?}",
-            self.history.count[side.index()]
-        );
+    pub(crate) const fn is_offset_applied(&self, side: CollisionSide) -> bool {
         self.offset_state & (side as usize) != 0
     }
 }

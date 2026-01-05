@@ -44,14 +44,14 @@ fn start(mut commands: Commands) {
     for x in 0..10 {
         let x = -300 + 64 * x;
         commands.spawn((
-            Collider::default(),
+            Collider,
             Size::new_f32(64.0, 64.0, 64.0),
             Position::new_f32(x as f32, 0.0, 0.0),
         ));
     }
 
     commands.spawn((
-        Collider::default(),
+        Collider,
         Size::new_f32(64.0, 64.0, 64.0),
         Position::new_f32(-64.0, 64.0, 0.0),
     ));
@@ -59,7 +59,7 @@ fn start(mut commands: Commands) {
     commands
         .spawn((
             PlayerMarker,
-            Collider::default(),
+            Collider,
             Size::new_f32(128.0, 128.0, 64.0),
             Position::new_f32(0.0, 1000.0, 0.0),
             Name::new("Player-Gameplay"),
@@ -104,7 +104,6 @@ fn apply_player_movement(
     player: Single<(&mut Position, &mut KinematicRigidBody), With<PlayerMarker>>,
 ) {
     let (mut position, mut rigid_body) = player.into_inner();
-    println!("Player position: {position:?}");
     for action in input.inner() {
         match action {
             Action::Click => {
