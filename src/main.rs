@@ -4,6 +4,7 @@
 #![allow(clippy::needless_pass_by_value)]
 #![allow(clippy::implicit_hasher)]
 #![allow(clippy::many_single_char_names)]
+#![allow(clippy::similar_names)]
 
 pub mod collision;
 mod determinism;

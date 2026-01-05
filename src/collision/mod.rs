@@ -8,7 +8,7 @@ use crate::determinism::transform::{GlobalPosition, Position, Size};
 use crate::physics::KinematicRigidBody;
 use bevy::prelude::*;
 use fixed::types::I32F32;
-use std::collections::{HashMap, HashSet};
+use strum_macros::EnumCount;
 
 #[derive(EntityEvent)]
 pub struct CollisionEnter {
@@ -36,17 +36,26 @@ pub struct Collider {
     pub(crate) enter: bool,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Reflect, EnumCount)]
 pub enum CollisionSide {
-    Left,   // -X
-    Right,  // +X
-    Bottom, // -Y (в играх часто низ — это Bottom или Down)
-    Top,    // +Y (верх — Top или Up)
-    Front,  // +Z (ближе к камере)
-    Back,   // -Z (дальше от камеры)
+    Left = 0b00_0001,   // -X
+    Right = 0b00_0010,  // +X
+    Bottom = 0b00_0100, // -Y
+    Top = 0b00_1000,    // +Y
+    Front = 0b01_0000,  // +Z
+    Back = 0b10_0000,   // -Z
+}
+
+impl CollisionSide {
+    #[must_use]
+    pub const fn index(&self) -> usize {
+        (*self as u32).trailing_zeros() as usize
+    }
 }
 
 fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
+    const CORNER_THRESHOLD: I32F32 = I32F32::const_from_int(2);
+
     // 1. Считаем перекрытия
     let overlap_left = b.max.x - a.min.x;
     let overlap_right = a.max.x - b.min.x;
@@ -71,19 +80,15 @@ fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
         .min(overlap_bottom)
         .min(dz);
 
-    const CORNER_THRESHOLD: I32F32 = I32F32::const_from_int(2);
-
     // 4. Приоритетность выбора стороны
     // Если min_overlap совпадает с Z-осью (и мы в 3D), возвращаем Front/Back
     if min_overlap == overlap_front && dz != I32F32::MAX {
         (CollisionSide::Front, overlap_front)
     } else if min_overlap == overlap_back && dz != I32F32::MAX {
         (CollisionSide::Back, overlap_back)
-    }
-    // Дальше ваша стандартная 2D логика
-    else if min_overlap == overlap_left && overlap_bottom < CORNER_THRESHOLD {
-        (CollisionSide::Bottom, overlap_bottom)
-    } else if min_overlap == overlap_right && overlap_bottom < CORNER_THRESHOLD {
+    } else if (min_overlap == overlap_left || min_overlap == overlap_right)
+        && overlap_bottom < CORNER_THRESHOLD
+    {
         (CollisionSide::Bottom, overlap_bottom)
     } else if min_overlap == overlap_left {
         (CollisionSide::Left, overlap_left)
@@ -100,11 +105,10 @@ pub fn apply_physics(
     mut commands: Commands,
     transform: Query<(Entity, &GlobalPosition, &Size), With<Collider>>,
     dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody, &mut Collider)>,
-    mut overlap_history: Local<HashMap<Entity, HashSet<Entity>>>,
     mut positions: Query<&mut Position>,
 ) {
-    for (entity, mut rigid_body, mut collider) in dynamic_rigid_body {
-        let (_, position, size) = transform.get(entity).unwrap();
+    for (current, mut rigid_body, mut collider) in dynamic_rigid_body {
+        let (_, position, size) = transform.get(current).unwrap();
         let mut iter = SubstepIterator::new(
             position,
             size,
@@ -114,26 +118,26 @@ pub fn apply_physics(
         );
 
         for (other, other_position, other_size) in transform {
-            if entity == other {
+            if current == other {
                 continue;
             }
 
             let other_rect = Aabb::from_pos_size(other_position.as_position(), other_size);
             let Some(rect) = iter.next_overlap(&other_rect) else {
-                let entry = overlap_history.entry(entity).or_default();
-                trigger_exit(entity, other, &mut commands, entry);
-                if entry.is_empty() {
+                if rigid_body.remove_other(other) {
+                    trigger_exit(current, other, &mut commands);
+                }
+                if rigid_body.is_history_empty() {
                     collider.enter = false;
-                    overlap_history.remove(&entity);
                 }
                 continue;
             };
 
             let (side, offset) = get_side_and_offset(&rect, &other_rect);
-            let position = &mut positions.get_mut(entity).unwrap();
-            if collider.enter {
+            let position = &mut positions.get_mut(current).unwrap();
+            if rigid_body.has_other(other) {
                 trigger_stay(
-                    entity,
+                    current,
                     side,
                     offset,
                     &mut commands,
@@ -141,10 +145,10 @@ pub fn apply_physics(
                     position,
                 );
             } else {
-                overlap_history.entry(entity).or_default().insert(other);
+                rigid_body.insert_other(other, side);
                 collider.enter = true;
                 trigger_enter(
-                    entity,
+                    current,
                     side,
                     offset,
                     &mut commands,
@@ -154,7 +158,7 @@ pub fn apply_physics(
                 );
 
                 trigger_stay(
-                    entity,
+                    current,
                     side,
                     offset,
                     &mut commands,
@@ -175,12 +179,6 @@ fn trigger_enter(
     rect: &Aabb,
     other_rect: &Aabb,
 ) {
-    commands.trigger(CollisionEnter {
-        entity,
-        side,
-        offset,
-    });
-
     //println!(
     //    "Side: {side:?}
     //    Other Rect: {:?}
@@ -202,6 +200,12 @@ fn trigger_enter(
         CollisionSide::Back => position.z = other_rect.max.z,
         CollisionSide::Front => position.z = other_rect.min.z - rect.d(),
     }
+
+    commands.trigger(CollisionEnter {
+        entity,
+        side,
+        offset,
+    });
 }
 
 fn trigger_stay(
@@ -212,12 +216,6 @@ fn trigger_stay(
     rigid_body: &mut KinematicRigidBody,
     position: &mut Position,
 ) {
-    commands.trigger(Collision {
-        entity,
-        side,
-        offset,
-    });
-
     match side {
         CollisionSide::Left => rigid_body.velocity.clamp_positive_x(),
         CollisionSide::Right => rigid_body.velocity.clamp_negative_x(),
@@ -229,26 +227,26 @@ fn trigger_stay(
         CollisionSide::Back => rigid_body.velocity.clamp_positive_z(),
     }
 
-    match side {
-        CollisionSide::Left => position.x += offset,
-        CollisionSide::Right => position.x -= offset,
+    if !rigid_body.is_offset_applied(side) {
+        match side {
+            CollisionSide::Left => position.x += offset,
+            CollisionSide::Right => position.x -= offset,
 
-        CollisionSide::Bottom => position.y += offset,
-        CollisionSide::Top => position.y -= offset,
+            CollisionSide::Bottom => position.y += offset,
+            CollisionSide::Top => position.y -= offset,
 
-        CollisionSide::Back => position.z -= offset,
-        CollisionSide::Front => position.z += offset,
+            CollisionSide::Back => position.z -= offset,
+            CollisionSide::Front => position.z += offset,
+        }
     }
-    //println!("[{side:?}] Rigidbody velocity: {:?}", rigid_body.velocity);
+
+    commands.trigger(Collision {
+        entity,
+        side,
+        offset,
+    });
 }
 
-fn trigger_exit(
-    entity: Entity,
-    other: Entity,
-    commands: &mut Commands,
-    entry: &mut HashSet<Entity>,
-) {
-    if entry.remove(&other) {
-        commands.trigger(CollisionExit { entity, other });
-    }
+fn trigger_exit(entity: Entity, other: Entity, commands: &mut Commands) {
+    commands.trigger(CollisionExit { entity, other });
 }

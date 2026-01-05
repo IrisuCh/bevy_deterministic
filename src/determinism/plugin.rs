@@ -60,7 +60,7 @@ fn start(mut commands: Commands) {
         .spawn((
             PlayerMarker,
             Collider::default(),
-            Size::new_f32(128.0, 128.0, 128.0),
+            Size::new_f32(128.0, 128.0, 64.0),
             Position::new_f32(0.0, 1000.0, 0.0),
             Name::new("Player-Gameplay"),
         ))
