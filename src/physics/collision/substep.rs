@@ -1,5 +1,7 @@
-use crate::collision::aabb::Aabb;
-use crate::determinism::transform::{GlobalPosition, Point, Size};
+use crate::{
+    physics::collision::Aabb,
+    transform::{GlobalPosition, Position, Size},
+};
 use fixed::types::I32F32;
 
 const STEPS: I32F32 = I32F32::const_from_int(16);
@@ -7,7 +9,7 @@ const STEPS: I32F32 = I32F32::const_from_int(16);
 pub struct SubstepIterator<'a> {
     position: &'a GlobalPosition,
     size: &'a Size,
-    step: Point,
+    step: Position,
     steps: I32F32,
     completed: I32F32,
 }
@@ -23,7 +25,7 @@ impl<'a> SubstepIterator<'a> {
         let x_step = velocity_x / STEPS;
         let y_step = velocity_y / STEPS;
         let z_step = velocity_z / STEPS;
-        let step = Point {
+        let step = Position {
             x: x_step,
             y: y_step,
             z: z_step,

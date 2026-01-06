@@ -1,12 +1,15 @@
 mod chunk;
 
-use crate::determinism::transform::{Position, Size};
 use bevy::prelude::*;
 use fixed::types::I32F32;
 use serde::{Deserialize, Serialize};
 
-use crate::collision::Collider;
-pub use chunk::*;
+pub(crate) use crate::tilemap::chunk::split_by_chunks;
+pub use crate::tilemap::chunk::{Chunk, ChunkStorage};
+use crate::{
+    physics::collision::Collider,
+    transform::{Position, Size},
+};
 
 #[derive(Component, Reflect)]
 pub struct TilemapSize {
@@ -89,9 +92,12 @@ impl TilemapStorage {
         commands: &mut Commands,
     ) {
         let pos = position.y as usize * width + position.x as usize;
-        if self.0[pos].is_some() {
-            panic!("Tile at {}, {} already exist", position.x, position.y);
-        }
+        assert!(
+            self.0[pos].is_none(),
+            "Tile at {}, {} already exist",
+            position.x,
+            position.y
+        );
 
         let tile = commands
             .spawn((
@@ -108,7 +114,7 @@ impl TilemapStorage {
     }
 }
 
-pub fn set_tiles_position(
+pub(crate) fn set_tiles_position(
     storages: Query<(&TileSize, &TilePadding), With<TilemapStorage>>,
     tiles: Query<
         (&mut Position, &mut Size, &TilePosition, &ChildOf),
@@ -128,7 +134,10 @@ pub trait OnChunkSpawn {
     fn on_chunk_spawn(commands: &mut Commands, entity: Entity);
 }
 
-pub fn on_chunk_spawn<T: OnChunkSpawn>(mut commands: Commands, query: Query<Entity, Added<Chunk>>) {
+pub(crate) fn on_chunk_spawn<T: OnChunkSpawn>(
+    mut commands: Commands,
+    query: Query<Entity, Added<Chunk>>,
+) {
     for entity in query {
         T::on_chunk_spawn(&mut commands, entity);
     }
@@ -137,6 +146,6 @@ pub fn on_chunk_spawn<T: OnChunkSpawn>(mut commands: Commands, query: Query<Enti
 pub struct CollisionBackend;
 impl OnChunkSpawn for CollisionBackend {
     fn on_chunk_spawn(commands: &mut Commands, entity: Entity) {
-        commands.entity(entity).insert(Collider::default());
+        commands.entity(entity).insert(Collider);
     }
 }

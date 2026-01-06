@@ -1,8 +1,9 @@
-use crate::map::Size;
-use bevy::prelude::{Changed, Commands, Component, Entity, Name, Query, Reflect};
 use bevy::prelude::*;
-use crate::determinism::transform::{GlobalPosition, Position};
-use crate::map::{TilemapSize, TilemapStorage};
+
+use crate::{
+    tilemap::{TilemapSize, TilemapStorage},
+    transform::{GlobalPosition, Position, Size},
+};
 
 #[derive(Component, Reflect, Default)]
 #[relationship_target(relationship = AttachedToChunk, linked_spawn)]
@@ -21,9 +22,12 @@ pub struct Chunk {
 pub const CHUNK_W: u32 = 16;
 pub const CHUNK_H: u32 = 16;
 
-pub fn split_by_chunks(
+pub(crate) fn split_by_chunks(
     mut commands: Commands,
-    query: Query<(Entity, &TilemapSize, &TilemapStorage, &mut ChunkStorage), Changed<TilemapStorage>>,
+    query: Query<
+        (Entity, &TilemapSize, &TilemapStorage, &mut ChunkStorage),
+        Changed<TilemapStorage>,
+    >,
     tile_data: Query<(&GlobalPosition, &Size)>,
 ) {
     for (map, size, tiles, mut chunks) in query {
@@ -40,9 +44,7 @@ pub fn split_by_chunks(
                 let mut set_pos = false;
                 let mut position = Position::default();
                 let mut size = Size::default();
-                let mut chunk = Chunk {
-                    tiles: vec![],
-                };
+                let mut chunk = Chunk { tiles: vec![] };
 
                 // границы чанка в тайлах
                 let start_x = cx * CHUNK_W;
@@ -70,15 +72,9 @@ pub fn split_by_chunks(
                     }
                 }
 
-                let chunk_entity = commands.spawn(
-                    (
-                        position,
-                        size,
-                        chunk,
-                        Name::new("Chunk"),
-                        ChildOf(map),
-                    )
-                ).id();
+                let chunk_entity = commands
+                    .spawn((position, size, chunk, Name::new("Chunk"), ChildOf(map)))
+                    .id();
                 chunks.0.push(chunk_entity);
             }
         }

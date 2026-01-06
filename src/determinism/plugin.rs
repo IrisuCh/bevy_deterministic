@@ -1,11 +1,16 @@
-use crate::collision::{Collider, apply_physics};
-use crate::determinism::transform::{Position, Size, sync_global_positions, sync_positions};
-use crate::input::InputSnapshot;
-use crate::map::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks};
-use crate::physics::KinematicRigidBody;
-use crate::simulation_input::{Action, WorldMousePosition};
 use bevy::prelude::*;
 use fixed::types::I32F32;
+
+use crate::{
+    input::InputSnapshot,
+    map::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
+    physics::{
+        KinematicRigidBody,
+        collision::{Collider, apply_physics},
+    },
+    simulation_input::{Action, WorldMousePosition},
+    transform::{Position, Size, sync_global_positions, sync_positions},
+};
 
 #[derive(Component, Reflect, Default)]
 pub struct TestMarker;
@@ -17,28 +22,6 @@ pub struct PlayerMarker;
 #[derive(Component, Reflect, Default)]
 #[require(KinematicRigidBody)]
 pub struct EntityMarker;
-
-pub struct GameplayPlugin;
-impl Plugin for GameplayPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_resource::<WorldMousePosition>();
-        app.add_systems(Startup, start);
-        app.add_systems(
-            FixedUpdate,
-            (
-                set_tiles_position,
-                split_by_chunks,
-                on_chunk_spawn::<CollisionBackend>,
-                apply_player_movement,
-                apply_physics,
-                update_entity_movement,
-                sync_global_positions,
-                sync_positions,
-            )
-                .chain(),
-        );
-    }
-}
 
 fn start(mut commands: Commands) {
     for x in 0..10 {
@@ -118,17 +101,5 @@ fn apply_player_movement(
             Action::Left => rigid_body.velocity.x = I32F32::const_from_int(2),
             Action::Right => rigid_body.velocity.x = I32F32::const_from_int(-2),
         }
-    }
-}
-
-fn update_entity_movement(
-    time: Res<Time<Fixed>>,
-    mut entities: Query<(&mut Position, &mut KinematicRigidBody)>,
-) {
-    for (mut position, mut rigid_body) in &mut entities {
-        position.x += rigid_body.velocity.x;
-        position.y += rigid_body.velocity.y;
-        position.z += rigid_body.velocity.z;
-        rigid_body.velocity.y -= I32F32::from_num(10.0 * time.delta_secs());
     }
 }

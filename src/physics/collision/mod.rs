@@ -1,55 +1,30 @@
 mod aabb;
+mod event;
+mod side;
 mod substep;
-pub mod tilemap_backend;
 
-use crate::collision::aabb::Aabb;
-use crate::collision::substep::SubstepIterator;
-use crate::determinism::transform::{GlobalPosition, Position, Size};
-use crate::physics::KinematicRigidBody;
 use bevy::prelude::*;
 use fixed::types::I32F32;
-use strum_macros::EnumCount;
 
-#[derive(EntityEvent)]
-pub struct CollisionEnter {
-    pub entity: Entity,
-    pub side: CollisionSide,
-    pub offset: I32F32,
-}
+pub use crate::physics::collision::{aabb::Aabb, side::CollisionSide};
+use crate::{
+    physics::{
+        KinematicRigidBody,
+        collision::{
+            event::{trigger_enter, trigger_exit, trigger_stay},
+            substep::SubstepIterator,
+        },
+    },
+    transform::{GlobalPosition, Position, Size},
+};
 
-#[derive(EntityEvent)]
-pub struct Collision {
-    pub entity: Entity,
-    pub side: CollisionSide,
-    pub offset: I32F32,
-}
-
-#[derive(EntityEvent)]
-pub struct CollisionExit {
-    pub entity: Entity,
-    pub other: Entity,
+pub mod prelude {
+    pub use super::*;
 }
 
 #[derive(Component, Reflect, Debug, Default)]
 #[require(Position)]
 pub struct Collider;
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Reflect, EnumCount)]
-pub enum CollisionSide {
-    Left = 0b00_0001,   // -X
-    Right = 0b00_0010,  // +X
-    Bottom = 0b00_0100, // -Y
-    Top = 0b00_1000,    // +Y
-    Front = 0b01_0000,  // +Z
-    Back = 0b10_0000,   // -Z
-}
-
-impl CollisionSide {
-    #[must_use]
-    pub const fn index(&self) -> usize {
-        (*self as u32).trailing_zeros() as usize
-    }
-}
 
 fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
     const CORNER_THRESHOLD: I32F32 = I32F32::const_from_int(2);
@@ -99,7 +74,7 @@ fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
     }
 }
 
-pub fn apply_physics(
+pub(crate) fn apply_physics(
     mut commands: Commands,
     transform: Query<(Entity, &GlobalPosition, &Size), With<Collider>>,
     dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
@@ -162,85 +137,4 @@ pub fn apply_physics(
             }
         }
     }
-}
-
-fn trigger_enter(
-    entity: Entity,
-    side: CollisionSide,
-    offset: I32F32,
-    commands: &mut Commands,
-    position: &mut Position,
-    rect: &Aabb,
-    other_rect: &Aabb,
-) {
-    //println!(
-    //    "Side: {side:?}
-    //    Other Rect: {:?}
-    //    Player: {:?}
-    //    Offset: {:?}
-    //    ",
-    //    other_rect.x() + other_rect.w(),
-    //    rect.x(),
-    //    offset,
-    //);
-
-    match side {
-        CollisionSide::Left => position.x = other_rect.max.x,
-        CollisionSide::Right => position.x = other_rect.min.x - rect.w(),
-
-        CollisionSide::Bottom => position.y = other_rect.max.y,
-        CollisionSide::Top => position.y = other_rect.min.y - rect.h(),
-
-        CollisionSide::Back => position.z = other_rect.max.z,
-        CollisionSide::Front => position.z = other_rect.min.z - rect.d(),
-    }
-
-    commands.trigger(CollisionEnter {
-        entity,
-        side,
-        offset,
-    });
-}
-
-fn trigger_stay(
-    entity: Entity,
-    side: CollisionSide,
-    offset: I32F32,
-    commands: &mut Commands,
-    rigid_body: &mut KinematicRigidBody,
-    position: &mut Position,
-) {
-    match side {
-        CollisionSide::Left => rigid_body.velocity.clamp_positive_x(),
-        CollisionSide::Right => rigid_body.velocity.clamp_negative_x(),
-
-        CollisionSide::Top => rigid_body.velocity.clamp_negative_y(),
-        CollisionSide::Bottom => rigid_body.velocity.clamp_positive_y(),
-
-        CollisionSide::Front => rigid_body.velocity.clamp_negative_z(),
-        CollisionSide::Back => rigid_body.velocity.clamp_positive_z(),
-    }
-
-    if !rigid_body.is_offset_applied(side) {
-        match side {
-            CollisionSide::Left => position.x += offset,
-            CollisionSide::Right => position.x -= offset,
-
-            CollisionSide::Bottom => position.y += offset,
-            CollisionSide::Top => position.y -= offset,
-
-            CollisionSide::Back => position.z -= offset,
-            CollisionSide::Front => position.z += offset,
-        }
-    }
-
-    commands.trigger(Collision {
-        entity,
-        side,
-        offset,
-    });
-}
-
-fn trigger_exit(entity: Entity, other: Entity, commands: &mut Commands) {
-    commands.trigger(CollisionExit { entity, other });
 }

@@ -1,16 +1,14 @@
-use crate::determinism::transform::{Position, Size};
 use fixed::types::I32F32;
+
+use crate::transform::{Position, Size};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Aabb {
-    // В AABB достаточно двух точек.
-    // Все остальные 6 вычисляются математически при необходимости.
     pub min: Position,
     pub max: Position,
 }
 
 impl Aabb {
-    // Создание из позиции и размера
     pub fn from_pos_size(pos: Position, size: &Size) -> Self {
         Self {
             min: pos,
