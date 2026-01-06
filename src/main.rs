@@ -8,13 +8,15 @@
 
 pub mod collision;
 mod determinism;
+mod input;
 mod map;
 mod physics;
 mod simulation_input;
 mod simulation_sync;
 
 use crate::determinism::plugin::GameplayPlugin;
-use crate::simulation_input::SimulationInputPlugin;
+use crate::input::InputPlugin;
+use crate::simulation_input::{Action, SimulationInputPlugin};
 use crate::simulation_sync::SimulationSyncPlugin;
 use bevy::prelude::*;
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
@@ -24,6 +26,7 @@ fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
 
+    app.add_plugins(InputPlugin::<Action>::default());
     app.add_plugins(GameplayPlugin);
     app.add_plugins(SimulationInputPlugin);
     app.add_plugins(SimulationSyncPlugin);

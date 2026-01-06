@@ -1,8 +1,9 @@
 use crate::collision::{Collider, apply_physics};
 use crate::determinism::transform::{Position, Size, sync_global_positions, sync_positions};
+use crate::input::InputSnapshot;
 use crate::map::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks};
 use crate::physics::KinematicRigidBody;
-use crate::simulation_input::{Action, InputSnapshot, WorldMousePosition};
+use crate::simulation_input::{Action, WorldMousePosition};
 use bevy::prelude::*;
 use fixed::types::I32F32;
 
@@ -21,7 +22,6 @@ pub struct GameplayPlugin;
 impl Plugin for GameplayPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<WorldMousePosition>();
-        app.init_resource::<InputSnapshot>();
         app.add_systems(Startup, start);
         app.add_systems(
             FixedUpdate,
@@ -99,11 +99,12 @@ fn start(mut commands: Commands) {
 }
 
 fn apply_player_movement(
-    input: Res<InputSnapshot>,
+    input: Res<InputSnapshot<Action>>,
     mouse_pos: Res<WorldMousePosition>,
     player: Single<(&mut Position, &mut KinematicRigidBody), With<PlayerMarker>>,
 ) {
     let (mut position, mut rigid_body) = player.into_inner();
+    rigid_body.velocity.x = I32F32::ZERO;
     for action in input.inner() {
         match action {
             Action::Click => {
@@ -116,7 +117,6 @@ fn apply_player_movement(
             Action::Fire => println!("Fire"),
             Action::Left => rigid_body.velocity.x = I32F32::const_from_int(2),
             Action::Right => rigid_body.velocity.x = I32F32::const_from_int(-2),
-            Action::Idle => rigid_body.velocity.x = I32F32::ZERO,
         }
     }
 }

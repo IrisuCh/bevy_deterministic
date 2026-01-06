@@ -1,13 +1,42 @@
 use bevy::prelude::*;
 use fixed::types::I32F32;
 
+use crate::{
+    input::prelude::{ActionType, InputRegistry, Key},
+    keys,
+};
+
+#[derive(Clone, Copy)]
+pub enum Action {
+    Click,
+    Jump,
+    Fire,
+    Left,
+    Right,
+}
+
 pub struct SimulationInputPlugin;
 
 impl Plugin for SimulationInputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            PreUpdate,
-            (update_world_mouse_position, make_input_snapshot),
+        app.add_systems(PreUpdate, update_world_mouse_position);
+
+        let mut registry = app.world_mut().resource_mut::<InputRegistry<Action>>();
+        registry.add_action("Jump", ActionType::JustPressed, keys![KeyZ], || {
+            Action::Jump
+        });
+        registry.add_action("Fire", ActionType::JustPressed, keys![KeyX], || {
+            Action::Fire
+        });
+
+        registry.add_action("Left", ActionType::Pressed, keys![Slash], || Action::Left);
+        registry.add_action("Right", ActionType::Pressed, keys![Comma], || Action::Right);
+
+        registry.add_action(
+            "Click",
+            ActionType::JustPressed,
+            vec![Key::from_mouse_index(0)],
+            || Action::Click,
         );
     }
 }
@@ -46,59 +75,4 @@ fn update_world_mouse_position(
 
     res.x = I32F32::from_num(world_pos.x);
     res.y = I32F32::from_num(world_pos.y);
-}
-
-#[derive(Clone, Copy)]
-pub enum Action {
-    Click,
-    Jump,
-    Fire,
-    Left,
-    Right,
-    Idle,
-}
-
-#[derive(Resource, Default, Clone)]
-pub struct InputSnapshot {
-    inner: Vec<Action>,
-}
-
-impl InputSnapshot {
-    pub const fn inner(&self) -> &[Action] {
-        self.inner.as_slice()
-    }
-}
-
-fn make_input_snapshot(
-    mut snapshot: ResMut<InputSnapshot>,
-    mouse: Res<ButtonInput<MouseButton>>,
-    keys: Res<ButtonInput<KeyCode>>,
-) {
-    snapshot.inner.clear();
-    if keys.just_pressed(KeyCode::KeyZ) {
-        snapshot.inner.push(Action::Jump);
-    }
-
-    if keys.just_pressed(KeyCode::KeyX) {
-        snapshot.inner.push(Action::Fire);
-    }
-
-    let mut idle = true;
-    if keys.pressed(KeyCode::Slash) {
-        snapshot.inner.push(Action::Left);
-        idle = false;
-    }
-
-    if keys.pressed(KeyCode::Comma) {
-        snapshot.inner.push(Action::Right);
-        idle = false;
-    }
-
-    if idle {
-        snapshot.inner.push(Action::Idle);
-    }
-
-    if mouse.just_pressed(MouseButton::Left) {
-        snapshot.inner.push(Action::Click);
-    }
 }
