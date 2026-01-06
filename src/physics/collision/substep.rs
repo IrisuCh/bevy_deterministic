@@ -1,8 +1,9 @@
+use fixed::types::I32F32;
+
 use crate::{
     physics::collision::Aabb,
     transform::{GlobalPosition, Position, Size},
 };
-use fixed::types::I32F32;
 
 const STEPS: I32F32 = I32F32::const_from_int(16);
 

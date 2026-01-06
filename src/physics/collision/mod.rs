@@ -8,6 +8,7 @@ use fixed::types::I32F32;
 
 pub use crate::physics::collision::{aabb::Aabb, side::CollisionSide};
 use crate::{
+    fx,
     physics::{
         KinematicRigidBody,
         collision::{
@@ -76,18 +77,20 @@ fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
 
 pub(crate) fn apply_physics(
     mut commands: Commands,
+    time: Res<Time<Fixed>>,
     transform: Query<(Entity, &GlobalPosition, &Size), With<Collider>>,
     dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
     mut positions: Query<&mut Position>,
 ) {
+    let delta = fx::from_num(time.delta_secs());
     for (current, mut rigid_body) in dynamic_rigid_body {
         let (_, position, size) = transform.get(current).unwrap();
         let mut iter = SubstepIterator::new(
             position,
             size,
-            rigid_body.velocity.x,
-            rigid_body.velocity.y,
-            rigid_body.velocity.z,
+            rigid_body.velocity.x * delta,
+            rigid_body.velocity.y * delta,
+            rigid_body.velocity.z * delta,
         );
 
         for (other, other_position, other_size) in transform {
