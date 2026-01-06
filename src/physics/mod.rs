@@ -22,6 +22,6 @@ pub(crate) fn apply_velocity(
         position.x += rigid_body.velocity.x;
         position.y += rigid_body.velocity.y;
         position.z += rigid_body.velocity.z;
-        rigid_body.velocity.y -= fx::from_num(10.0 * time.delta_secs());
+        //rigid_body.velocity.y -= fx::from_num(10.0 * time.delta_secs());
     }
 }
