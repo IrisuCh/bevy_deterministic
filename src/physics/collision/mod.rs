@@ -23,7 +23,7 @@ pub mod prelude {
 }
 
 #[derive(Component, Reflect, Debug, Default)]
-#[require(Position)]
+#[require(Position, Size)]
 pub struct Collider;
 
 fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
