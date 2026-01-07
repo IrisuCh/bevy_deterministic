@@ -1,15 +1,12 @@
 mod chunk;
 
 use bevy::prelude::*;
-use fixed::types::I32F32;
+use fx::Fx;
 use serde::{Deserialize, Serialize};
 
 pub(crate) use crate::tilemap::chunk::split_by_chunks;
 pub use crate::tilemap::chunk::{Chunk, ChunkStorage};
-use crate::{
-    physics::collision::Collider,
-    transform::{FVec3, FixedTransform},
-};
+use crate::{physics::collision::Collider, transform::FixedTransform};
 
 #[derive(Component, Reflect)]
 pub struct TilemapSize {
@@ -27,15 +24,15 @@ impl TilemapSize {
 #[reflect(opaque)]
 #[reflect(Serialize, Deserialize)]
 pub struct TileSize {
-    x: I32F32,
-    y: I32F32,
+    x: Fx,
+    y: Fx,
 }
 
 impl TileSize {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
-            x: I32F32::from_num(x),
-            y: I32F32::from_num(y),
+            x: Fx::from_num(x),
+            y: Fx::from_num(y),
         }
     }
 }
@@ -44,8 +41,8 @@ impl TileSize {
 #[reflect(opaque)]
 #[reflect(Serialize, Deserialize)]
 pub struct TilePadding {
-    pub x: I32F32,
-    pub y: I32F32,
+    pub x: Fx,
+    pub y: Fx,
 }
 
 #[derive(Component, Reflect, Deref, DerefMut)]
@@ -125,8 +122,8 @@ pub(crate) fn set_tiles_position(
         let (tile_size, tile_padding) = storages.get(parent.0).unwrap();
         transform.size.x = tile_size.x;
         transform.size.y = tile_size.y;
-        transform.position.x = I32F32::from_num(tile_pos.x) * (tile_size.x + tile_padding.x);
-        transform.position.y = I32F32::from_num(tile_pos.y) * (tile_size.y + tile_padding.y);
+        transform.position.x = Fx::from_num(tile_pos.x) * (tile_size.x + tile_padding.x);
+        transform.position.y = Fx::from_num(tile_pos.y) * (tile_size.y + tile_padding.y);
     }
 }
 

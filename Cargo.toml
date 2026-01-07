@@ -1,9 +1,10 @@
-[package]
-name = "bevy_deterministic"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = ["crates/bevy_deterministic", "crates/fx"]
 
-[dependencies]
+[workspace.dependencies]
+fx = { path = "crates/fx" }
+
 bevy = "0.17.3"
 fixed = { version = "1.29.0", features = ["serde"] }
 serde = { version = "1.0.228", features = ["derive"] }

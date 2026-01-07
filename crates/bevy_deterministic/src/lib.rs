@@ -17,6 +17,7 @@ pub mod tilemap;
 pub mod transform;
 
 use bevy::prelude::*;
+pub use fx::{Fx, fx};
 pub use sync::SyncTarget;
 
 use crate::{
@@ -26,8 +27,6 @@ use crate::{
     tilemap::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
     transform::{sync_fixed_global_transforms, sync_fixed_transforms, sync_transform},
 };
-
-pub type Fx = ::fixed::types::I32F32;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlayerLogicSet;
@@ -75,10 +74,3 @@ impl Plugin for GameplayPlugin {
  * Apply velocity
  * Sync
  */
-
-#[macro_export]
-macro_rules! fx {
-    ($n:expr) => {
-        $crate::Fx::from_num($n)
-    };
-}

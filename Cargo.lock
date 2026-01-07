@@ -597,7 +597,7 @@ name = "bevy_deterministic"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "fixed",
+ "fx",
  "serde",
  "strum",
  "strum_macros",
@@ -2371,6 +2371,13 @@ dependencies = [
  "futures-io",
  "parking",
  "pin-project-lite",
+]
+
+[[package]]
+name = "fx"
+version = "0.1.0"
+dependencies = [
+ "fixed",
 ]
 
 [[package]]

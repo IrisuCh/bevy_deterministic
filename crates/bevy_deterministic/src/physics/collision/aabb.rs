@@ -1,5 +1,3 @@
-use fixed::types::I32F32;
-
 use crate::{
     Fx,
     transform::{FQuat, FVec3},
@@ -12,6 +10,7 @@ pub struct Aabb {
 }
 
 impl Aabb {
+    #[must_use]
     pub fn from_pos_size(pos: FVec3, size: FVec3) -> Self {
         Self {
             min: pos,
@@ -23,35 +22,45 @@ impl Aabb {
         }
     }
 
-    pub fn new(x: I32F32, y: I32F32, z: I32F32, w: I32F32, h: I32F32, d: I32F32) -> Self {
+    #[must_use]
+    pub fn new(x: Fx, y: Fx, z: Fx, w: Fx, h: Fx, d: Fx) -> Self {
         Self {
             min: FVec3::new_fixed(x, y, z),
             max: FVec3::new_fixed(x + w, y + h, z + d),
         }
     }
 
-    // Хелперы для быстрого доступа
-    pub const fn x(&self) -> I32F32 {
+    #[must_use]
+    pub const fn x(&self) -> Fx {
         self.min.x
     }
-    pub const fn y(&self) -> I32F32 {
+
+    #[must_use]
+    pub const fn y(&self) -> Fx {
         self.min.y
     }
-    pub const fn z(&self) -> I32F32 {
+
+    #[must_use]
+    pub const fn z(&self) -> Fx {
         self.min.z
     }
 
-    pub fn w(&self) -> I32F32 {
+    #[must_use]
+    pub fn w(&self) -> Fx {
         self.max.x - self.min.x
     }
-    pub fn h(&self) -> I32F32 {
+
+    #[must_use]
+    pub fn h(&self) -> Fx {
         self.max.y - self.min.y
     }
-    pub fn d(&self) -> I32F32 {
+
+    #[must_use]
+    pub fn d(&self) -> Fx {
         self.max.z - self.min.z
     }
 
-    // Проверка попадания точки в бокс (3D)
+    #[must_use]
     pub fn contains_point(&self, p: &FVec3) -> bool {
         p.x >= self.min.x
             && p.x <= self.max.x
@@ -63,6 +72,7 @@ impl Aabb {
 
     // Оптимизированная проверка пересечения двух AABB (3D)
     // Использует закон исключения: если по любой оси есть разрыв, значит столкновения нет.
+    #[must_use]
     pub fn intersects(&self, other: &Aabb) -> bool {
         self.min.x <= other.max.x
             && self.max.x >= other.min.x
@@ -72,7 +82,7 @@ impl Aabb {
             && self.max.z >= other.min.z
     }
 
-    // Если вам всё же нужны углы для отрисовки, генерируйте их лениво
+    #[must_use]
     pub fn corners(&self) -> [FVec3; 8] {
         [
             FVec3::new_fixed(self.min.x, self.min.y, self.min.z),

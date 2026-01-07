@@ -1,17 +1,15 @@
 pub mod collision;
 mod debug;
 mod rigidbody;
-mod velocity;
 
 use bevy::prelude::*;
 pub use debug::PhysicsDebugManager;
 pub(crate) use debug::draw_collider_debug_lines;
 pub use rigidbody::KinematicRigidBody;
-pub use velocity::Velocity;
 
 use crate::{Fx, transform::FixedTransform};
 pub mod prelude {
-    pub use super::{KinematicRigidBody, PhysicsDebugManager, Velocity, collision::prelude::*};
+    pub use super::{KinematicRigidBody, PhysicsDebugManager, collision::prelude::*};
 }
 
 pub(crate) fn apply_velocity(

@@ -1,7 +1,6 @@
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
 
 use bevy::prelude::*;
-use fixed::types::I32F32;
 use serde::{Deserialize, Serialize};
 
 use crate::Fx;
@@ -23,44 +22,44 @@ use crate::Fx;
 #[reflect(opaque)]
 #[reflect(Serialize, Deserialize)]
 pub struct FVec3 {
-    pub x: I32F32,
-    pub y: I32F32,
-    pub z: I32F32,
+    pub x: Fx,
+    pub y: Fx,
+    pub z: Fx,
 }
 
 impl FVec3 {
     pub const ZERO: Self = Self {
-        x: I32F32::ZERO,
-        y: I32F32::ZERO,
-        z: I32F32::ZERO,
+        x: Fx::ZERO,
+        y: Fx::ZERO,
+        z: Fx::ZERO,
     };
 
     pub const ONE: Self = Self {
-        x: I32F32::const_from_int(1),
-        y: I32F32::const_from_int(1),
-        z: I32F32::const_from_int(1),
+        x: Fx::const_from_int(1),
+        y: Fx::const_from_int(1),
+        z: Fx::const_from_int(1),
     };
 
     #[must_use]
-    pub fn new_fixed(x: I32F32, y: I32F32, z: I32F32) -> Self {
+    pub fn new_fixed(x: Fx, y: Fx, z: Fx) -> Self {
         Self { x, y, z }
     }
 
     #[must_use]
     pub fn new_f32(x: f32, y: f32, z: f32) -> Self {
         Self {
-            x: I32F32::from_num(x),
-            y: I32F32::from_num(y),
-            z: I32F32::from_num(z),
+            x: Fx::from_num(x),
+            y: Fx::from_num(y),
+            z: Fx::from_num(z),
         }
     }
 
     #[must_use]
     pub fn from_vec3(vec: Vec3) -> Self {
         Self {
-            x: I32F32::from_num(vec.x),
-            y: I32F32::from_num(vec.y),
-            z: I32F32::from_num(vec.z),
+            x: Fx::from_num(vec.x),
+            y: Fx::from_num(vec.y),
+            z: Fx::from_num(vec.z),
         }
     }
 

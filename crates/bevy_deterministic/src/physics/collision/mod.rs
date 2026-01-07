@@ -98,8 +98,6 @@ pub(crate) fn apply_physics(
                 continue;
             };
 
-            println!("Collision detected between {rect:#?} and {other_rect:#?}");
-
             let position = &mut positions.get_mut(current).unwrap();
             position.position -= collision_info.normal * (collision_info.depth - fx!(f32::EPSILON));
             block_movement_along_normal(collision_info.normal, &mut rigid_body.velocity);
