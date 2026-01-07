@@ -101,6 +101,7 @@ impl<O> Action<O> {
         }
     }
 
+    #[must_use]
     pub const fn name(&self) -> &str {
         self.name.as_str()
     }

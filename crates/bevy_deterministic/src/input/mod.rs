@@ -2,8 +2,9 @@ mod action;
 mod key;
 mod macros;
 
-use bevy::prelude::*;
 use std::fmt::Debug;
+
+use bevy::prelude::*;
 
 use crate::input::{
     action::{
@@ -53,6 +54,7 @@ impl<O: Send + Sync + 'static> Default for InputSnapshot<O> {
 }
 
 impl<O: Send + Sync + 'static> InputSnapshot<O> {
+    #[must_use]
     pub const fn inner(&self) -> &[O] {
         self.inner.as_slice()
     }

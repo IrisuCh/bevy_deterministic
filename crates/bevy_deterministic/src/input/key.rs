@@ -28,6 +28,7 @@ impl From<MouseButton> for Key {
 
 impl Key {
     #[inline]
+    #[must_use]
     pub const fn from_mouse_index(index: u16) -> Self {
         let mouse = match index {
             0 => Some(MouseButton::Left),
@@ -44,6 +45,7 @@ impl Key {
     }
 
     #[inline]
+    #[must_use]
     pub const fn from_kb(keys: Vec<KeyCode>) -> Self {
         Self {
             keyboard: keys,

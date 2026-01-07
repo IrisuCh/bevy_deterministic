@@ -15,6 +15,7 @@ pub struct TilemapSize {
 }
 
 impl TilemapSize {
+    #[must_use]
     pub const fn new(width: u32, height: u32) -> Self {
         Self { width, height }
     }
@@ -29,6 +30,7 @@ pub struct TileSize {
 }
 
 impl TileSize {
+    #[must_use]
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             x: Fx::from_num(x),
@@ -56,6 +58,7 @@ pub struct TilePosition {
 }
 
 impl TilePosition {
+    #[must_use]
     pub const fn new(x: u32, y: u32) -> Self {
         Self { x, y }
     }
@@ -75,6 +78,7 @@ pub struct TilemapBundle {
 pub struct TilemapStorage(Vec<Option<Entity>>);
 
 impl TilemapStorage {
+    #[must_use]
     pub fn new(map_size: &TilemapSize) -> Self {
         let capacity = map_size.width as usize * map_size.height as usize;
         Self(vec![None; capacity])

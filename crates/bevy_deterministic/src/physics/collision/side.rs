@@ -14,6 +14,7 @@ pub enum CollisionSide {
 impl CollisionSide {
     #[must_use]
     #[inline(always)]
+    #[allow(clippy::inline_always)]
     pub const fn index(&self) -> usize {
         (*self as u32).trailing_zeros() as usize
     }
