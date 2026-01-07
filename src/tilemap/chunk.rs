@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     tilemap::{TilemapSize, TilemapStorage},
-    transform::{GlobalPosition, Position, Size},
+    transform::FixedTransform,
 };
 
 #[derive(Component, Reflect, Default)]
@@ -14,7 +14,7 @@ pub struct ChunkStorage(Vec<Entity>);
 pub struct AttachedToChunk(Entity);
 
 #[derive(Component, Reflect)]
-#[require(Size, Position)]
+#[require(FixedTransform)]
 pub struct Chunk {
     tiles: Vec<Entity>,
 }
@@ -28,7 +28,7 @@ pub(crate) fn split_by_chunks(
         (Entity, &TilemapSize, &TilemapStorage, &mut ChunkStorage),
         Changed<TilemapStorage>,
     >,
-    tile_data: Query<(&GlobalPosition, &Size)>,
+    tile_data: Query<&FixedTransform>,
 ) {
     for (map, size, tiles, mut chunks) in query {
         chunks.0.clear();
@@ -42,8 +42,7 @@ pub(crate) fn split_by_chunks(
         for cy in 0..chunk_rows {
             for cx in 0..chunk_cols {
                 let mut set_pos = false;
-                let mut position = Position::default();
-                let mut size = Size::default();
+                let mut transform = FixedTransform::default();
                 let mut chunk = Chunk { tiles: vec![] };
 
                 // границы чанка в тайлах
@@ -58,22 +57,22 @@ pub(crate) fn split_by_chunks(
                     for x in start_x..end_x {
                         let idx = (y * map_w + x) as usize;
                         if let Some(tile) = tiles.0[idx] {
-                            let (tile_pos, tile_size) = tile_data.get(tile).unwrap();
+                            let tile_transform = tile_data.get(tile).unwrap();
                             if !set_pos {
                                 set_pos = true;
-                                position.x = tile_pos.x();
-                                position.y = tile_pos.y();
+                                transform.position.x = tile_transform.position.x;
+                                transform.position.y = tile_transform.position.y;
                             }
 
-                            size.x += tile_size.x;
-                            size.y += tile_size.y;
+                            transform.size.x += tile_transform.size.x;
+                            transform.size.y += tile_transform.size.y;
                             chunk.tiles.push(tile);
                         }
                     }
                 }
 
                 let chunk_entity = commands
-                    .spawn((position, size, chunk, Name::new("Chunk"), ChildOf(map)))
+                    .spawn((transform, chunk, Name::new("Chunk"), ChildOf(map)))
                     .id();
                 chunks.0.push(chunk_entity);
             }

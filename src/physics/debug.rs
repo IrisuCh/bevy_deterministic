@@ -1,9 +1,6 @@
 use bevy::{color::palettes::css::GREEN, prelude::*};
 
-use crate::{
-    physics::prelude::Collider,
-    transform::{GlobalPosition, Size},
-};
+use crate::{physics::prelude::Collider, transform::FixedTransform};
 
 #[derive(Resource, Default)]
 pub struct PhysicsDebugManager {
@@ -11,19 +8,27 @@ pub struct PhysicsDebugManager {
 }
 
 pub(crate) fn draw_collider_debug_lines(
+    manager: Res<PhysicsDebugManager>,
     mut gizmos: Gizmos,
-    query: Query<(&GlobalPosition, &Size), With<Collider>>,
+    query: Query<&FixedTransform, With<Collider>>,
 ) {
-    for (pos, size) in &query {
+    if !manager.draw_collider_lines {
+        return;
+    }
+
+    for transform in &query {
+        let pos = transform.position;
+        let size = transform.size;
+        let rotation = transform.rotation;
+
         let x = pos.x_f32() + size.x_f32() / 2.0;
         let y = pos.y_f32() + size.y_f32() / 2.0;
         let z = pos.z_f32() + size.z_f32() / 2.0;
-        let w = size.x_f32();
-        let h = size.y_f32();
-        let d = size.z_f32();
 
         gizmos.cuboid(
-            Transform::from_xyz(x, y, z).with_scale(Vec3::new(w, h, d)),
+            Transform::from_xyz(x, y, z)
+                .with_scale(size.as_vec3())
+                .with_rotation(rotation.as_quat()),
             GREEN,
         );
     }

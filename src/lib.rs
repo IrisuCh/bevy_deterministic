@@ -20,11 +20,11 @@ use crate::{
         PhysicsDebugManager, apply_velocity, draw_collider_debug_lines, prelude::apply_physics,
     },
     tilemap::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
-    transform::{sync_global_positions, sync_positions, sync_transform},
+    transform::{sync_fixed_global_transforms, sync_fixed_transforms, sync_transform},
 };
 
 #[allow(non_camel_case_types)]
-pub type fx = ::fixed::types::I32F32;
+pub type Fx = ::fixed::types::I32F32;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlayerLogicSet;
@@ -52,8 +52,8 @@ impl Plugin for GameplayPlugin {
                 (
                     apply_physics,
                     apply_velocity,
-                    sync_global_positions,
-                    sync_positions,
+                    sync_fixed_global_transforms,
+                    sync_fixed_transforms,
                 )
                     .chain()
                     .in_set(InternalDeterministicSet),

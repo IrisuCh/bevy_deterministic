@@ -8,7 +8,7 @@ use fixed::types::I32F32;
 
 pub use crate::physics::collision::{aabb::Aabb, side::CollisionSide};
 use crate::{
-    fx,
+    Fx,
     physics::{
         KinematicRigidBody,
         collision::{
@@ -16,7 +16,7 @@ use crate::{
             substep::SubstepIterator,
         },
     },
-    transform::{GlobalPosition, Position, Size},
+    transform::{FixedGlobalTransform, FixedTransform},
 };
 
 pub mod prelude {
@@ -24,7 +24,7 @@ pub mod prelude {
 }
 
 #[derive(Component, Reflect, Debug, Default)]
-#[require(Position, Size)]
+#[require(FixedTransform)]
 pub struct Collider;
 
 fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
@@ -78,27 +78,29 @@ fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
 pub(crate) fn apply_physics(
     mut commands: Commands,
     time: Res<Time<Fixed>>,
-    transform: Query<(Entity, &GlobalPosition, &Size), With<Collider>>,
+    transform: Query<(Entity, &FixedGlobalTransform), With<Collider>>,
     dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
-    mut positions: Query<&mut Position>,
+    mut positions: Query<&mut FixedTransform>,
 ) {
-    let delta = fx::from_num(time.delta_secs());
+    let delta = Fx::from_num(time.delta_secs());
     for (current, mut rigid_body) in dynamic_rigid_body {
-        let (_, position, size) = transform.get(current).unwrap();
+        let (_, global_transform) = transform.get(current).unwrap();
         let mut iter = SubstepIterator::new(
-            position,
-            size,
+            global_transform.transform(),
             rigid_body.velocity.x * delta,
             rigid_body.velocity.y * delta,
             rigid_body.velocity.z * delta,
         );
 
-        for (other, other_position, other_size) in transform {
+        for (other, other_global_transform) in transform {
             if current == other {
                 continue;
             }
 
-            let other_rect = Aabb::from_pos_size(other_position.as_position(), other_size);
+            let other_rect = Aabb::from_pos_size(
+                other_global_transform.position(),
+                other_global_transform.size(),
+            );
             let Some(rect) = iter.next_overlap(&other_rect) else {
                 if rigid_body.remove_other(other) {
                     trigger_exit(current, other, &mut commands);

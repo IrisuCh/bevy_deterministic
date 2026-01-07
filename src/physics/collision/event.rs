@@ -6,7 +6,7 @@ use crate::{
         collision::{CollisionSide, aabb::Aabb},
         rigidbody::KinematicRigidBody,
     },
-    transform::Position,
+    transform::FixedTransform,
 };
 
 #[derive(EntityEvent)]
@@ -34,19 +34,19 @@ pub(super) fn trigger_enter(
     side: CollisionSide,
     offset: I32F32,
     commands: &mut Commands,
-    position: &mut Position,
+    transform: &mut FixedTransform,
     rect: &Aabb,
     other_rect: &Aabb,
 ) {
     match side {
-        CollisionSide::Left => position.x = other_rect.max.x,
-        CollisionSide::Right => position.x = other_rect.min.x - rect.w(),
+        CollisionSide::Left => transform.position.x = other_rect.max.x,
+        CollisionSide::Right => transform.position.x = other_rect.min.x - rect.w(),
 
-        CollisionSide::Bottom => position.y = other_rect.max.y,
-        CollisionSide::Top => position.y = other_rect.min.y - rect.h(),
+        CollisionSide::Bottom => transform.position.y = other_rect.max.y,
+        CollisionSide::Top => transform.position.y = other_rect.min.y - rect.h(),
 
-        CollisionSide::Back => position.z = other_rect.max.z,
-        CollisionSide::Front => position.z = other_rect.min.z - rect.d(),
+        CollisionSide::Back => transform.position.z = other_rect.max.z,
+        CollisionSide::Front => transform.position.z = other_rect.min.z - rect.d(),
     }
 
     commands.trigger(CollisionEnter {
@@ -62,7 +62,7 @@ pub(super) fn trigger_stay(
     offset: I32F32,
     commands: &mut Commands,
     rigid_body: &mut KinematicRigidBody,
-    position: &mut Position,
+    transform: &mut FixedTransform,
 ) {
     match side {
         CollisionSide::Left => rigid_body.velocity.clamp_positive_x(),
@@ -77,14 +77,14 @@ pub(super) fn trigger_stay(
 
     if !rigid_body.is_offset_applied(side) {
         match side {
-            CollisionSide::Left => position.x += offset,
-            CollisionSide::Right => position.x -= offset,
+            CollisionSide::Left => transform.position.x += offset,
+            CollisionSide::Right => transform.position.x -= offset,
 
-            CollisionSide::Bottom => position.y += offset,
-            CollisionSide::Top => position.y -= offset,
+            CollisionSide::Bottom => transform.position.y += offset,
+            CollisionSide::Top => transform.position.y -= offset,
 
-            CollisionSide::Back => position.z -= offset,
-            CollisionSide::Front => position.z += offset,
+            CollisionSide::Back => transform.position.z -= offset,
+            CollisionSide::Front => transform.position.z += offset,
         }
     }
 

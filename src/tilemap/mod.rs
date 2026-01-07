@@ -8,7 +8,7 @@ pub(crate) use crate::tilemap::chunk::split_by_chunks;
 pub use crate::tilemap::chunk::{Chunk, ChunkStorage};
 use crate::{
     physics::collision::Collider,
-    transform::{Position, Size},
+    transform::{FVec3, FixedTransform},
 };
 
 #[derive(Component, Reflect)]
@@ -49,7 +49,7 @@ pub struct TilePadding {
 }
 
 #[derive(Component, Reflect, Deref, DerefMut)]
-#[require(Position, Size)]
+#[require(FixedTransform)]
 pub struct TileIndex(pub u32);
 
 #[derive(Component, Reflect)]
@@ -70,7 +70,7 @@ pub struct TilemapBundle {
     pub map_size: TilemapSize,
     pub tile_size: TileSize,
     pub tile_padding: TilePadding,
-    pub position: Position,
+    //pub position: FVec3,
 }
 
 #[derive(Component, Reflect)]
@@ -104,8 +104,8 @@ impl TilemapStorage {
                 position,
                 index,
                 ChildOf(map),
-                Position::default(),
-                Size::default(),
+                //Position::default(),
+                //Size::default(),
                 Name::new("Tile"),
             ))
             .id();
@@ -117,16 +117,16 @@ impl TilemapStorage {
 pub(crate) fn set_tiles_position(
     storages: Query<(&TileSize, &TilePadding), With<TilemapStorage>>,
     tiles: Query<
-        (&mut Position, &mut Size, &TilePosition, &ChildOf),
-        Or<(Changed<Position>, Changed<TilePosition>, Changed<Size>)>,
+        (&mut FixedTransform, &TilePosition, &ChildOf),
+        Or<(Changed<FixedTransform>, Changed<TilePosition>)>,
     >,
 ) {
-    for (mut pos, mut size, tile_pos, parent) in tiles {
+    for (mut transform, tile_pos, parent) in tiles {
         let (tile_size, tile_padding) = storages.get(parent.0).unwrap();
-        size.x = tile_size.x;
-        size.y = tile_size.y;
-        pos.x = I32F32::from_num(tile_pos.x) * (tile_size.x + tile_padding.x);
-        pos.y = I32F32::from_num(tile_pos.y) * (tile_size.y + tile_padding.y);
+        transform.size.x = tile_size.x;
+        transform.size.y = tile_size.y;
+        transform.position.x = I32F32::from_num(tile_pos.x) * (tile_size.x + tile_padding.x);
+        transform.position.y = I32F32::from_num(tile_pos.y) * (tile_size.y + tile_padding.y);
     }
 }
 
