@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-
 use bevy::prelude::*;
 use strum::EnumCount;
 
 use crate::{
+    DetMap,
     physics::collision::{Collider, CollisionSide},
     transform::FVec3,
 };
@@ -19,10 +18,12 @@ pub struct KinematicRigidBody {
 }
 
 impl KinematicRigidBody {
+    #[inline]
     pub(crate) fn insert_other(&mut self, other: Entity, side: CollisionSide) {
         self.history.insert_other(other, side);
     }
 
+    #[inline]
     pub(crate) fn remove_other(&mut self, other: Entity) -> bool {
         if let Some(count) = self.history.remove_other(other) {
             count == 0
@@ -31,14 +32,15 @@ impl KinematicRigidBody {
         }
     }
 
+    #[inline]
     pub(crate) fn has_other(&self, other: Entity) -> bool {
         self.history.has_other(other)
     }
 }
 
-#[derive(Reflect, Default, Debug)]
+#[derive(Default, Debug)]
 struct EntityList {
-    map: HashMap<Entity, CollisionSide>,
+    map: DetMap<Entity, CollisionSide>,
     count: [usize; CollisionSide::COUNT],
 }
 
@@ -49,7 +51,7 @@ impl EntityList {
     }
 
     fn remove_other(&mut self, other: Entity) -> Option<usize> {
-        if let Some(side) = self.map.remove(&other) {
+        if let Some(side) = self.map.shift_remove(&other) {
             let index = side.index();
             self.count[index] -= 1;
             Some(self.count[index])

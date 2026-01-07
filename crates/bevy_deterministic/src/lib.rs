@@ -9,6 +9,8 @@
 #![deny(clippy::float_cmp)]
 #![deny(clippy::cast_possible_truncation)]
 #![deny(clippy::cast_precision_loss)]
+//#![deny(clippy::as_conversions)]
+#![deny(clippy::disallowed_types)]
 
 pub mod input;
 pub mod physics;
@@ -27,6 +29,10 @@ use crate::{
     tilemap::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
     transform::{sync_fixed_global_transforms, sync_fixed_transforms, sync_transform},
 };
+
+#[allow(clippy::disallowed_types)]
+pub type DetMap<K, V> =
+    indexmap::IndexMap<K, V, std::hash::BuildHasherDefault<rustc_hash::FxHasher>>;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlayerLogicSet;

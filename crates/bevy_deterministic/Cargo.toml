@@ -10,3 +10,5 @@ bevy.workspace = true
 serde.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
+indexmap.workspace = true
+rustc-hash.workspace = true
