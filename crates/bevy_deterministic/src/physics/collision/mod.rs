@@ -74,12 +74,6 @@ pub(crate) fn apply_physics(
             rigid_body.velocity.z * delta,
         );
 
-        let rect = Obb::from_transform(
-            global_transform.position(),
-            global_transform.size(),
-            global_transform.rotation(),
-        );
-
         for (other, other_global_transform) in transform {
             if current == other {
                 continue;
@@ -115,22 +109,9 @@ pub(crate) fn apply_physics(
 }
 
 fn block_movement_along_normal(normal: FVec3, velocity: &mut FVec3) {
-    // normal указывает ОТ динамического К статическому
-    let vel_toward_static = velocity.dot(normal);
+    let normal_vel = velocity.dot(normal);
 
-    // Если движемся К статическому (normal_vel > 0) — блокируем
-    if vel_toward_static > Fx::ZERO {
-        *velocity -= normal * vel_toward_static;
+    if normal_vel > Fx::ZERO {
+        *velocity -= normal * normal_vel;
     }
-    // Если normal_vel < 0 — движемся ОТ статического, разрешаем
 }
-
-//fn block_movement_along_normal(normal: FVec3, velocity: &mut FVec3) {
-//    // Проекция скорости на нормаль
-//    let normal_vel = velocity.dot(normal);
-//
-//    // Если движемся В нормаль (внутрь объекта) - обнуляем эту компоненту
-//    if normal_vel < Fx::ZERO {
-//        *velocity -= normal * normal_vel;
-//    }
-//}
