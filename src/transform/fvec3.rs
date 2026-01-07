@@ -218,6 +218,18 @@ impl Div for FVec3 {
     }
 }
 
+impl Div<Fx> for FVec3 {
+    type Output = Self;
+
+    fn div(self, rhs: Fx) -> Self::Output {
+        Self {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
+    }
+}
+
 impl Neg for FVec3 {
     type Output = Self;
 

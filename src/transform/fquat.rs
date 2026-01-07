@@ -1,8 +1,11 @@
-use std::ops::{Add, AddAssign, Mul};
+use std::ops::Mul;
 
 use bevy::prelude::*;
 
-use crate::{Fx, transform::FVec3};
+use crate::{
+    Fx, fx,
+    transform::{FVec3, trigonometry},
+};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FQuat {
@@ -76,8 +79,13 @@ impl FQuat {
     #[inline]
     #[must_use]
     pub fn from_rotation_y(angle: f32) -> Self {
-        let (s, c) = f32::sin_cos(angle * 0.5);
-        Self::from_xyzw(0.0, s, 0.0, c)
+        let (s, c) = trigonometry::sin_cos_fixed(fx!(angle) * fx!(0.5));
+        Self {
+            x: Fx::ZERO,
+            y: s,
+            z: Fx::ZERO,
+            w: c,
+        }
     }
 
     /// Сопряжённый кватернион (обратное вращение)

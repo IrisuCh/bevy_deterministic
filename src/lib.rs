@@ -5,6 +5,10 @@
 #![allow(clippy::implicit_hasher)]
 #![allow(clippy::many_single_char_names)]
 #![allow(clippy::similar_names)]
+#![deny(clippy::float_arithmetic)]
+#![deny(clippy::float_cmp)]
+#![deny(clippy::cast_possible_truncation)]
+#![deny(clippy::cast_precision_loss)]
 
 pub mod input;
 pub mod physics;
