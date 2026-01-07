@@ -1,4 +1,4 @@
-use std::ops::Mul;
+use std::ops::{Add, AddAssign, Mul};
 
 use bevy::prelude::*;
 
@@ -92,6 +92,7 @@ impl FQuat {
         }
     }
 
+    #[must_use]
     pub fn rotate_vec3(&self, vec: FVec3) -> FVec3 {
         // q * v * q⁻¹
         // где v — чистый кватернион (w=0)

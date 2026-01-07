@@ -3,20 +3,22 @@ mod event;
 mod side;
 mod substep;
 
+use std::f32;
+
 use bevy::prelude::*;
-use fixed::types::I32F32;
 
 pub use crate::physics::collision::{aabb::Aabb, side::CollisionSide};
 use crate::{
-    Fx,
+    Fx, fx,
     physics::{
         KinematicRigidBody,
         collision::{
+            aabb::Obb,
             event::{trigger_enter, trigger_exit, trigger_stay},
             substep::SubstepIterator,
         },
     },
-    transform::{FixedGlobalTransform, FixedTransform},
+    transform::{FVec3, FixedGlobalTransform, FixedTransform},
 };
 
 pub mod prelude {
@@ -27,51 +29,31 @@ pub mod prelude {
 #[require(FixedTransform)]
 pub struct Collider;
 
-fn get_side_and_offset(a: &Aabb, b: &Aabb) -> (CollisionSide, I32F32) {
-    const CORNER_THRESHOLD: I32F32 = I32F32::const_from_int(2);
+fn normal_to_side(normal: FVec3) -> CollisionSide {
+    let abs_normal = FVec3::new_fixed(normal.x.abs(), normal.y.abs(), normal.z.abs());
 
-    // 1. Считаем перекрытия
-    let overlap_left = b.max.x - a.min.x;
-    let overlap_right = a.max.x - b.min.x;
-    let overlap_bottom = b.max.y - a.min.y;
-    let overlap_top = a.max.y - b.min.y;
-    let overlap_back = b.max.z - a.min.z;
-    let overlap_front = a.max.z - b.min.z;
-
-    // 2. Важный момент: если мы в 2D, то разница по Z может быть 0 или некорректна.
-    // Чтобы Z не перебивала X и Y, мы проверяем, есть ли вообще объем по Z.
-    // Если d() == 0, ставим очень большое число, чтобы min() его не выбрал.
-    let dz = if a.d() > 0 && b.d() > 0 {
-        overlap_back.min(overlap_front)
+    // Находим самую большую компоненту нормали
+    if abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z {
+        // Доминирует X ось
+        if normal.x > Fx::ZERO {
+            CollisionSide::Right
+        } else {
+            CollisionSide::Left
+        }
+    } else if abs_normal.y > abs_normal.z {
+        // Доминирует Y ось
+        if normal.y > Fx::ZERO {
+            CollisionSide::Top
+        } else {
+            CollisionSide::Bottom
+        }
     } else {
-        I32F32::MAX // Игнорируем Z в 2D
-    };
-
-    // 3. Находим фактический минимум среди активных осей
-    let min_overlap = overlap_left
-        .min(overlap_right)
-        .min(overlap_top)
-        .min(overlap_bottom)
-        .min(dz);
-
-    // 4. Приоритетность выбора стороны
-    // Если min_overlap совпадает с Z-осью (и мы в 3D), возвращаем Front/Back
-    if min_overlap == overlap_front && dz != I32F32::MAX {
-        (CollisionSide::Front, overlap_front)
-    } else if min_overlap == overlap_back && dz != I32F32::MAX {
-        (CollisionSide::Back, overlap_back)
-    } else if (min_overlap == overlap_left || min_overlap == overlap_right)
-        && overlap_bottom < CORNER_THRESHOLD
-    {
-        (CollisionSide::Bottom, overlap_bottom)
-    } else if min_overlap == overlap_left {
-        (CollisionSide::Left, overlap_left)
-    } else if min_overlap == overlap_right {
-        (CollisionSide::Right, overlap_right)
-    } else if min_overlap == overlap_top {
-        (CollisionSide::Top, overlap_top)
-    } else {
-        (CollisionSide::Bottom, overlap_bottom)
+        // Доминирует Z ось
+        if normal.z > Fx::ZERO {
+            CollisionSide::Front
+        } else {
+            CollisionSide::Back
+        }
     }
 }
 
@@ -92,54 +74,65 @@ pub(crate) fn apply_physics(
             rigid_body.velocity.z * delta,
         );
 
+        let rect = Obb::from_transform(
+            global_transform.position(),
+            global_transform.size(),
+            global_transform.rotation(),
+        );
+
         for (other, other_global_transform) in transform {
             if current == other {
                 continue;
             }
 
-            let other_rect = Aabb::from_pos_size(
+            let other_rect = Obb::from_transform(
                 other_global_transform.position(),
                 other_global_transform.size(),
+                other_global_transform.rotation(),
             );
-            let Some(rect) = iter.next_overlap(&other_rect) else {
+
+            let Some(collision_info) = iter.next_overlap(&other_rect) else {
                 if rigid_body.remove_other(other) {
                     trigger_exit(current, other, &mut commands);
                 }
                 continue;
             };
 
-            let (side, offset) = get_side_and_offset(&rect, &other_rect);
+            println!("Collision detected between {rect:#?} and {other_rect:#?}");
+
             let position = &mut positions.get_mut(current).unwrap();
+            position.position -= collision_info.normal * (collision_info.depth - fx!(f32::EPSILON));
+            block_movement_along_normal(collision_info.normal, &mut rigid_body.velocity);
+
+            let side = normal_to_side(collision_info.normal);
             if rigid_body.has_other(other) {
-                trigger_stay(
-                    current,
-                    side,
-                    offset,
-                    &mut commands,
-                    &mut rigid_body,
-                    position,
-                );
+                trigger_stay(current, side, &mut commands);
             } else {
                 rigid_body.insert_other(other, side);
-                trigger_enter(
-                    current,
-                    side,
-                    offset,
-                    &mut commands,
-                    position,
-                    &rect,
-                    &other_rect,
-                );
-
-                trigger_stay(
-                    current,
-                    side,
-                    offset,
-                    &mut commands,
-                    &mut rigid_body,
-                    position,
-                );
+                trigger_enter(current, side, &mut commands);
+                trigger_stay(current, side, &mut commands);
             }
         }
     }
 }
+
+fn block_movement_along_normal(normal: FVec3, velocity: &mut FVec3) {
+    // normal указывает ОТ динамического К статическому
+    let vel_toward_static = velocity.dot(normal);
+
+    // Если движемся К статическому (normal_vel > 0) — блокируем
+    if vel_toward_static > Fx::ZERO {
+        *velocity -= normal * vel_toward_static;
+    }
+    // Если normal_vel < 0 — движемся ОТ статического, разрешаем
+}
+
+//fn block_movement_along_normal(normal: FVec3, velocity: &mut FVec3) {
+//    // Проекция скорости на нормаль
+//    let normal_vel = velocity.dot(normal);
+//
+//    // Если движемся В нормаль (внутрь объекта) - обнуляем эту компоненту
+//    if normal_vel < Fx::ZERO {
+//        *velocity -= normal * normal_vel;
+//    }
+//}

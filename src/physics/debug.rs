@@ -12,7 +12,7 @@ pub(crate) fn draw_collider_debug_lines(
     mut gizmos: Gizmos,
     query: Query<&FixedTransform, With<Collider>>,
 ) {
-    if !manager.draw_collider_lines {
+    if manager.draw_collider_lines {
         return;
     }
 

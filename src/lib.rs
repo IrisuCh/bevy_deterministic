@@ -23,7 +23,6 @@ use crate::{
     transform::{sync_fixed_global_transforms, sync_fixed_transforms, sync_transform},
 };
 
-#[allow(non_camel_case_types)]
 pub type Fx = ::fixed::types::I32F32;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -72,3 +71,10 @@ impl Plugin for GameplayPlugin {
  * Apply velocity
  * Sync
  */
+
+#[macro_export]
+macro_rules! fx {
+    ($n:expr) => {
+        $crate::Fx::from_num($n)
+    };
+}

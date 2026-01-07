@@ -70,6 +70,16 @@ impl FixedTransform {
         self.rotation = quat;
         self
     }
+
+    #[inline]
+    pub fn rotate(&mut self, rotation: FQuat) {
+        self.rotation = rotation * self.rotation;
+    }
+
+    #[inline]
+    pub fn rotate_y(&mut self, angle: f32) {
+        self.rotate(FQuat::from_rotation_y(angle));
+    }
 }
 
 #[derive(Component, Default, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -97,6 +107,11 @@ impl FixedGlobalTransform {
     #[must_use]
     pub const fn size(&self) -> FVec3 {
         self.size
+    }
+
+    #[must_use]
+    pub const fn rotation(&self) -> FQuat {
+        self.rotation
     }
 }
 

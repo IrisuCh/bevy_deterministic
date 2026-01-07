@@ -3,15 +3,15 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use strum::EnumCount;
 
-use crate::physics::{
-    collision::{Collider, CollisionSide},
-    velocity::Velocity,
+use crate::{
+    physics::collision::{Collider, CollisionSide},
+    transform::FVec3,
 };
 
 #[derive(Component, Reflect, Debug, Default)]
 #[require(Collider)]
 pub struct KinematicRigidBody {
-    pub velocity: Velocity,
+    pub velocity: FVec3,
     pub freeze: bool,
 
     #[reflect(ignore)]
