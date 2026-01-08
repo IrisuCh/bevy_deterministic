@@ -28,7 +28,28 @@ pub mod prelude {
 
 #[derive(Component, Reflect, Debug, Default)]
 #[require(FixedTransform)]
-pub struct Collider;
+pub struct Collider {
+    pub trigger: bool,
+    pub disabled: bool,
+}
+
+impl Collider {
+    #[must_use]
+    pub const fn trigger() -> Self {
+        Self {
+            trigger: true,
+            disabled: false,
+        }
+    }
+
+    #[must_use]
+    pub const fn disabled() -> Self {
+        Self {
+            trigger: false,
+            disabled: true,
+        }
+    }
+}
 
 fn normal_to_side(normal: FVec3) -> CollisionSide {
     let abs_normal = FVec3::new(normal.x.abs(), normal.y.abs(), normal.z.abs());
@@ -61,12 +82,16 @@ fn normal_to_side(normal: FVec3) -> CollisionSide {
 pub(crate) fn apply_physics(
     mut commands: Commands,
     time: Res<FixedTime>,
-    transform: Query<(Entity, &FixedGlobalTransform), With<Collider>>,
+    transform: Query<(Entity, &FixedGlobalTransform, &Collider)>,
     dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
     mut positions: Query<&mut FixedTransform>,
 ) {
     for (current, mut rigid_body) in dynamic_rigid_body {
-        let (_, global_transform) = transform.get(current).unwrap();
+        let (_, global_transform, collider) = transform.get(current).unwrap();
+        if collider.disabled {
+            continue;
+        }
+
         let mut iter = SubstepIterator::new(
             global_transform.transform(),
             rigid_body.velocity.x * time.delta_time(),
@@ -74,8 +99,8 @@ pub(crate) fn apply_physics(
             rigid_body.velocity.z * time.delta_time(),
         );
 
-        for (other, other_global_transform) in transform {
-            if current == other {
+        for (other, other_global_transform, other_collider) in transform {
+            if current == other || other_collider.disabled {
                 continue;
             }
 

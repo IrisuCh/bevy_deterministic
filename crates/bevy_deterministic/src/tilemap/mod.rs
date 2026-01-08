@@ -147,6 +147,6 @@ pub(crate) fn on_chunk_spawn<T: OnChunkSpawn>(
 pub struct CollisionBackend;
 impl OnChunkSpawn for CollisionBackend {
     fn on_chunk_spawn(commands: &mut Commands, entity: Entity) {
-        commands.entity(entity).insert(Collider);
+        commands.entity(entity).insert(Collider::default());
     }
 }
