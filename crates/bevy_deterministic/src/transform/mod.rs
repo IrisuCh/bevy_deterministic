@@ -1,10 +1,12 @@
+mod direction;
 mod fquat;
 mod fvec3;
 
 use bevy::prelude::*;
+use fx::IntoFx;
 
-use crate::sync::SyncTarget;
 pub use crate::transform::{fquat::FQuat, fvec3::FVec3};
+use crate::{sync::SyncTarget, transform::direction::FDir3};
 
 pub mod prelude {
     pub use super::*;
@@ -30,38 +32,31 @@ impl Default for FixedTransform {
 
 impl FixedTransform {
     #[must_use]
-    pub fn from_xyz(x: f32, y: f32, z: f32) -> Self {
+    pub fn from_xyz(x: impl IntoFx, y: impl IntoFx, z: impl IntoFx) -> Self {
         Self {
-            position: FVec3::new_f32(x, y, z),
-            size: FVec3::new_f32(1.0, 1.0, 1.0),
+            position: FVec3::new(x, y, z),
+            size: FVec3::new(1, 1, 1),
+            ..Self::default()
+        }
+    }
+
+    pub fn from_vec3(position: impl Into<FVec3>) -> Self {
+        Self {
+            position: position.into(),
+            size: FVec3::new(1, 1, 1),
             ..Self::default()
         }
     }
 
     #[must_use]
-    pub fn from_position_vec3(position: Vec3) -> Self {
-        Self {
-            position: FVec3::from_vec3(position),
-            size: FVec3::new_f32(1.0, 1.0, 1.0),
-            ..Self::default()
-        }
-    }
-
-    #[must_use]
-    pub fn with_scale(mut self, scale: FVec3) -> Self {
-        self.size = scale;
+    pub fn with_scale(mut self, scale: impl Into<FVec3>) -> Self {
+        self.size = scale.into();
         self
     }
 
     #[must_use]
-    pub fn with_scale_xyz(mut self, x: f32, y: f32, z: f32) -> Self {
-        self.size = FVec3::new_f32(x, y, z);
-        self
-    }
-
-    #[must_use]
-    pub fn with_scale_vec3(mut self, scale: Vec3) -> Self {
-        self.size = FVec3::from_vec3(scale);
+    pub fn with_scale_xyz(mut self, x: impl IntoFx, y: impl IntoFx, z: impl IntoFx) -> Self {
+        self.size = FVec3::new(x, y, z);
         self
     }
 
@@ -77,18 +72,84 @@ impl FixedTransform {
     }
 
     #[inline]
-    pub fn rotate_x(&mut self, angle: f32) {
+    pub fn rotate_x(&mut self, angle: impl IntoFx) {
         self.rotate(FQuat::from_rotation_x(angle));
     }
 
     #[inline]
-    pub fn rotate_y(&mut self, angle: f32) {
+    pub fn rotate_y(&mut self, angle: impl IntoFx) {
         self.rotate(FQuat::from_rotation_y(angle));
     }
 
     #[inline]
-    pub fn rotate_z(&mut self, angle: f32) {
+    pub fn rotate_z(&mut self, angle: impl IntoFx) {
         self.rotate(FQuat::from_rotation_z(angle));
+    }
+
+    /// Get the unit vector in the local `X` direction.
+    #[inline]
+    #[must_use]
+    pub fn local_x(&self) -> FDir3 {
+        // Quat * unit vector is length 1
+        FDir3::new_unchecked(self.rotation * FVec3::X)
+    }
+
+    /// Equivalent to [`-local_x()`][Transform::local_x()]
+    #[inline]
+    #[must_use]
+    pub fn left(&self) -> FDir3 {
+        -self.local_x()
+    }
+
+    /// Equivalent to [`local_x()`][Transform::local_x()]
+    #[inline]
+    #[must_use]
+    pub fn right(&self) -> FDir3 {
+        self.local_x()
+    }
+
+    /// Get the unit vector in the local `Y` direction.
+    #[inline]
+    #[must_use]
+    pub fn local_y(&self) -> FDir3 {
+        // Quat * unit vector is length 1
+        FDir3::new_unchecked(self.rotation * FVec3::Y)
+    }
+
+    /// Equivalent to [`local_y()`][Transform::local_y]
+    #[inline]
+    #[must_use]
+    pub fn up(&self) -> FDir3 {
+        self.local_y()
+    }
+
+    /// Equivalent to [`-local_y()`][Transform::local_y]
+    #[inline]
+    #[must_use]
+    pub fn down(&self) -> FDir3 {
+        -self.local_y()
+    }
+
+    /// Get the unit vector in the local `Z` direction.
+    #[inline]
+    #[must_use]
+    pub fn local_z(&self) -> FDir3 {
+        // Quat * unit vector is length 1
+        FDir3::new_unchecked(self.rotation * FVec3::Z)
+    }
+
+    /// Equivalent to [`-local_z()`][Transform::local_z]
+    #[inline]
+    #[must_use]
+    pub fn forward(&self) -> FDir3 {
+        -self.local_z()
+    }
+
+    /// Equivalent to [`local_z()`][Transform::local_z]
+    #[inline]
+    #[must_use]
+    pub fn back(&self) -> FDir3 {
+        self.local_z()
     }
 }
 

@@ -30,7 +30,7 @@ pub mod prelude {
 pub struct Collider;
 
 fn normal_to_side(normal: FVec3) -> CollisionSide {
-    let abs_normal = FVec3::new_fixed(normal.x.abs(), normal.y.abs(), normal.z.abs());
+    let abs_normal = FVec3::new(normal.x.abs(), normal.y.abs(), normal.z.abs());
 
     // Находим самую большую компоненту нормали
     if abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z {

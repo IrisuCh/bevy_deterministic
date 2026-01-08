@@ -52,7 +52,7 @@ impl Iterator for SubstepIterator {
         let z = self.transform.position.z + self.step.z * mul;
         self.completed += Fx::const_from_int(1);
         Some(Obb::from_transform(
-            FVec3::new_fixed(x, y, z),
+            FVec3::new(x, y, z),
             self.transform.size,
             self.transform.rotation,
         ))

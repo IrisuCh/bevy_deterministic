@@ -1,6 +1,7 @@
 use std::ops::Mul;
 
 use bevy::prelude::*;
+use fx::IntoFx;
 
 use crate::{Fx, fx, transform::FVec3};
 
@@ -21,17 +22,12 @@ impl FQuat {
     };
 
     #[must_use]
-    pub const fn new(x: Fx, y: Fx, z: Fx, w: Fx) -> Self {
-        Self { x, y, z, w }
-    }
-
-    #[must_use]
-    pub fn from_xyzw(x: f32, y: f32, z: f32, w: f32) -> Self {
+    pub fn from_xyzw(x: impl IntoFx, y: impl IntoFx, z: impl IntoFx, w: impl IntoFx) -> Self {
         Self {
-            x: Fx::from_num(x),
-            y: Fx::from_num(y),
-            z: Fx::from_num(z),
-            w: Fx::from_num(w),
+            x: x.into_fx(),
+            y: y.into_fx(),
+            z: z.into_fx(),
+            w: w.into_fx(),
         }
     }
 
@@ -76,25 +72,28 @@ impl FQuat {
     /// Creates a quaternion from the `angle` (in radians) around the x axis.
     #[inline]
     #[must_use]
-    pub fn from_rotation_x(angle: f32) -> Self {
-        let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
-        Self::new(s, Fx::ZERO, Fx::ZERO, c)
+    pub fn from_rotation_x(angle: impl IntoFx) -> Self {
+        let angle = angle.into_fx();
+        let (s, c) = cordic::sin_cos(angle * fx!(0.5));
+        Self::from_xyzw(s, Fx::ZERO, Fx::ZERO, c)
     }
 
     /// Creates a quaternion from the `angle` (in radians) around the y axis.
     #[inline]
     #[must_use]
-    pub fn from_rotation_y(angle: f32) -> Self {
-        let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
-        Self::new(Fx::ZERO, s, Fx::ZERO, c)
+    pub fn from_rotation_y(angle: impl IntoFx) -> Self {
+        let angle = angle.into_fx();
+        let (s, c) = cordic::sin_cos(angle * fx!(0.5));
+        Self::from_xyzw(Fx::ZERO, s, Fx::ZERO, c)
     }
 
     /// Creates a quaternion from the `angle` (in radians) around the z axis.
     #[inline]
     #[must_use]
-    pub fn from_rotation_z(angle: f32) -> Self {
-        let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
-        Self::new(Fx::ZERO, Fx::ZERO, s, c)
+    pub fn from_rotation_z(angle: impl IntoFx) -> Self {
+        let angle = angle.into_fx();
+        let (s, c) = cordic::sin_cos(angle * fx!(0.5));
+        Self::from_xyzw(Fx::ZERO, Fx::ZERO, s, c)
     }
 
     /// Сопряжённый кватернион (обратное вращение)
@@ -115,14 +114,14 @@ impl FQuat {
         // где v — чистый кватернион (w=0)
 
         // Конвертируем вектор в чистый кватернион
-        let v = FQuat::new(vec.x, vec.y, vec.z, Fx::ZERO);
+        let v = FQuat::from_xyzw(vec.x, vec.y, vec.z, Fx::ZERO);
 
         // Вычисляем: self * v * self.conjugate()
         let self_conj = self.conjugate();
         let result = (*self * v) * self_conj;
 
         // Возвращаем векторную часть
-        FVec3::new_fixed(result.x, result.y, result.z)
+        FVec3::new(result.x, result.y, result.z)
     }
 }
 
@@ -151,5 +150,13 @@ impl Mul<Fx> for FQuat {
             z: self.z * scalar,
             w: self.w * scalar,
         }
+    }
+}
+
+impl Mul<FVec3> for FQuat {
+    type Output = FVec3;
+
+    fn mul(self, vec: FVec3) -> Self::Output {
+        self.rotate_vec3(vec)
     }
 }

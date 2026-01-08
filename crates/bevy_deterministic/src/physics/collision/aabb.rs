@@ -25,8 +25,8 @@ impl Aabb {
     #[must_use]
     pub fn new(x: Fx, y: Fx, z: Fx, w: Fx, h: Fx, d: Fx) -> Self {
         Self {
-            min: FVec3::new_fixed(x, y, z),
-            max: FVec3::new_fixed(x + w, y + h, z + d),
+            min: FVec3::new(x, y, z),
+            max: FVec3::new(x + w, y + h, z + d),
         }
     }
 
@@ -85,14 +85,14 @@ impl Aabb {
     #[must_use]
     pub fn corners(&self) -> [FVec3; 8] {
         [
-            FVec3::new_fixed(self.min.x, self.min.y, self.min.z),
-            FVec3::new_fixed(self.max.x, self.min.y, self.min.z),
-            FVec3::new_fixed(self.min.x, self.max.y, self.min.z),
-            FVec3::new_fixed(self.max.x, self.max.y, self.min.z),
-            FVec3::new_fixed(self.min.x, self.min.y, self.max.z),
-            FVec3::new_fixed(self.max.x, self.min.y, self.max.z),
-            FVec3::new_fixed(self.min.x, self.max.y, self.max.z),
-            FVec3::new_fixed(self.max.x, self.max.y, self.max.z),
+            FVec3::new(self.min.x, self.min.y, self.min.z),
+            FVec3::new(self.max.x, self.min.y, self.min.z),
+            FVec3::new(self.min.x, self.max.y, self.min.z),
+            FVec3::new(self.max.x, self.max.y, self.min.z),
+            FVec3::new(self.min.x, self.min.y, self.max.z),
+            FVec3::new(self.max.x, self.min.y, self.max.z),
+            FVec3::new(self.min.x, self.max.y, self.max.z),
+            FVec3::new(self.max.x, self.max.y, self.max.z),
         ]
     }
 }
@@ -170,9 +170,9 @@ impl Obb {
 
     pub fn axes(&self) -> [FVec3; 3] {
         [
-            self.rotation.rotate_vec3(FVec3::new_f32(1.0, 0.0, 0.0)), // X
-            self.rotation.rotate_vec3(FVec3::new_f32(0.0, 1.0, 0.0)), // Y
-            self.rotation.rotate_vec3(FVec3::new_f32(0.0, 0.0, 1.0)), // Z
+            self.rotation.rotate_vec3(FVec3::new(1, 0, 0)), // X
+            self.rotation.rotate_vec3(FVec3::new(0, 1, 0)), // Y
+            self.rotation.rotate_vec3(FVec3::new(0, 0, 1)), // Z
         ]
     }
 
@@ -193,9 +193,9 @@ impl Obb {
 
     pub fn vertices(&self) -> [FVec3; 8] {
         // Локальные оси после вращения
-        let axis_x = self.rotation.rotate_vec3(FVec3::new_f32(1.0, 0.0, 0.0));
-        let axis_y = self.rotation.rotate_vec3(FVec3::new_f32(0.0, 1.0, 0.0));
-        let axis_z = self.rotation.rotate_vec3(FVec3::new_f32(0.0, 0.0, 1.0));
+        let axis_x = self.rotation.rotate_vec3(FVec3::new(1, 0, 0));
+        let axis_y = self.rotation.rotate_vec3(FVec3::new(0, 1, 0));
+        let axis_z = self.rotation.rotate_vec3(FVec3::new(0, 0, 1));
 
         // Смещения по осям
         let dx = axis_x * self.half_extents.x;
@@ -214,16 +214,6 @@ impl Obb {
             self.center + dx + dy + dz,
         ]
     }
-
-    //pub fn w(&self) -> I32F32 {
-    //    self.max.x - self.min.x
-    //}
-    //pub fn h(&self) -> I32F32 {
-    //    self.max.y - self.min.y
-    //}
-    //pub fn d(&self) -> I32F32 {
-    //    self.max.z - self.min.z
-    //}
 }
 
 #[derive(Debug)]

@@ -19,7 +19,7 @@ pub mod tilemap;
 pub mod transform;
 
 use bevy::prelude::*;
-pub use fx::{Fx, const_fx, fx};
+pub use fx::{Fx, IntoFx, const_fx, fx};
 pub use sync::SyncTarget;
 
 use crate::{

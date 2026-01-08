@@ -13,3 +13,4 @@ strum_macros.workspace = true
 indexmap.workspace = true
 rustc-hash.workspace = true
 cordic.workspace = true
+derive_more.workspace = true

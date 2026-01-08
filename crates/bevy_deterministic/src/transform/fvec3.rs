@@ -1,6 +1,7 @@
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
 
 use bevy::prelude::*;
+use fx::IntoFx;
 use serde::{Deserialize, Serialize};
 
 use crate::Fx;
@@ -28,29 +29,92 @@ pub struct FVec3 {
 }
 
 impl FVec3 {
+    /// All zeroes.
     pub const ZERO: Self = Self {
         x: Fx::ZERO,
         y: Fx::ZERO,
         z: Fx::ZERO,
     };
 
+    /// All ones.
     pub const ONE: Self = Self {
         x: Fx::const_from_int(1),
         y: Fx::const_from_int(1),
         z: Fx::const_from_int(1),
     };
 
-    #[must_use]
-    pub fn new_fixed(x: Fx, y: Fx, z: Fx) -> Self {
-        Self { x, y, z }
-    }
+    /// All negative ones.
+    pub const NEG_ONE: Self = Self {
+        x: Fx::const_from_int(-1),
+        y: Fx::const_from_int(-1),
+        z: Fx::const_from_int(-1),
+    };
+
+    /// All `Fx::MIN`.
+    pub const MIN: Self = Self {
+        x: Fx::MIN,
+        y: Fx::MIN,
+        z: Fx::MIN,
+    };
+
+    /// All `Fx::MAX`.
+    pub const MAX: Self = Self {
+        x: Fx::MAX,
+        y: Fx::MAX,
+        z: Fx::MAX,
+    };
+
+    /// A unit vector pointing along the positive X axis.
+    pub const X: Self = Self {
+        x: Fx::const_from_int(1),
+        y: Fx::const_from_int(0),
+        z: Fx::const_from_int(0),
+    };
+
+    /// A unit vector pointing along the positive Y axis.
+    pub const Y: Self = Self {
+        x: Fx::const_from_int(0),
+        y: Fx::const_from_int(1),
+        z: Fx::const_from_int(0),
+    };
+
+    /// A unit vector pointing along the positive Z axis.
+    pub const Z: Self = Self {
+        x: Fx::const_from_int(0),
+        y: Fx::const_from_int(0),
+        z: Fx::const_from_int(1),
+    };
+
+    /// A unit vector pointing along the negative X axis.
+    pub const NEG_X: Self = Self {
+        x: Fx::const_from_int(-1),
+        y: Fx::const_from_int(0),
+        z: Fx::const_from_int(0),
+    };
+
+    /// A unit vector pointing along the negative Y axis.
+    pub const NEG_Y: Self = Self {
+        x: Fx::const_from_int(0),
+        y: Fx::const_from_int(-1),
+        z: Fx::const_from_int(0),
+    };
+
+    /// A unit vector pointing along the negative Z axis.
+    pub const NEG_Z: Self = Self {
+        x: Fx::const_from_int(0),
+        y: Fx::const_from_int(0),
+        z: Fx::const_from_int(-1),
+    };
+
+    /// The unit axes.
+    pub const AXES: [Self; 3] = [Self::X, Self::Y, Self::Z];
 
     #[must_use]
-    pub fn new_f32(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: impl IntoFx, y: impl IntoFx, z: impl IntoFx) -> Self {
         Self {
-            x: Fx::from_num(x),
-            y: Fx::from_num(y),
-            z: Fx::from_num(z),
+            x: x.into_fx(),
+            y: y.into_fx(),
+            z: z.into_fx(),
         }
     }
 
@@ -238,5 +302,12 @@ impl Neg for FVec3 {
             y: -self.y,
             z: -self.z,
         }
+    }
+}
+
+impl From<Vec3> for FVec3 {
+    #[inline]
+    fn from(value: Vec3) -> Self {
+        Self::new(value.x, value.y, value.z)
     }
 }
