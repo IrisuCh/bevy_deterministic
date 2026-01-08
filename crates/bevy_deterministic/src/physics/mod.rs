@@ -17,6 +17,10 @@ pub(crate) fn apply_velocity(
     mut entities: Query<(&mut FixedTransform, &KinematicRigidBody)>,
 ) {
     for (mut transform, rigid_body) in &mut entities {
+        if rigid_body.freeze {
+            continue;
+        }
+
         transform.position.x += rigid_body.velocity.x * time.delta_time();
         transform.position.y += rigid_body.velocity.y * time.delta_time();
         transform.position.z += rigid_body.velocity.z * time.delta_time();
