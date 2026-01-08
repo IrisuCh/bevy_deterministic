@@ -2,10 +2,7 @@ use std::ops::Mul;
 
 use bevy::prelude::*;
 
-use crate::{
-    Fx, fx,
-    transform::{FVec3, trigonometry},
-};
+use crate::{Fx, fx, transform::FVec3};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FQuat {
@@ -79,7 +76,7 @@ impl FQuat {
     #[inline]
     #[must_use]
     pub fn from_rotation_y(angle: f32) -> Self {
-        let (s, c) = trigonometry::sin_cos_fixed(fx!(angle) * fx!(0.5));
+        let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
         Self {
             x: Fx::ZERO,
             y: s,

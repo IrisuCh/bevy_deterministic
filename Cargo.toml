@@ -11,4 +11,5 @@ serde = { version = "1.0.228", features = ["derive"] }
 strum = "0.27.2"
 strum_macros = "0.27.2"
 rustc-hash = "2.1.1"
-indexmap = "2.12.1"
+indexmap = "2.13.0"
+cordic = "0.1.5"

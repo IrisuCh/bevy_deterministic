@@ -1,6 +1,5 @@
 mod fquat;
 mod fvec3;
-mod trigonometry;
 
 use bevy::prelude::*;
 
