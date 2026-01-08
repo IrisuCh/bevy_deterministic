@@ -3,5 +3,6 @@ disallowed-types = [
     { path = "std::collections::HashSet", reason = "Use IndexSet with deterministic hasher instead" },
     { path = "std::time::Instant", reason = "Use a logical tick counter for physics" },
     { path = "indexmap::IndexMap", reason = "Use crate::types::DetMap instead" },
-    { path = "indexmap::IndexSet", reason = "Use crate::types::DetSet instead" }
+    { path = "indexmap::IndexSet", reason = "Use crate::types::DetSet instead" },
+    { path = "bevy_time::Time", reason = "Use FixedTime instead" },
 ]

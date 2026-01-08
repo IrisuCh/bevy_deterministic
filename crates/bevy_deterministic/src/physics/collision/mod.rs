@@ -18,6 +18,7 @@ use crate::{
             substep::SubstepIterator,
         },
     },
+    resources::FixedTime,
     transform::{FVec3, FixedGlobalTransform, FixedTransform},
 };
 
@@ -59,19 +60,18 @@ fn normal_to_side(normal: FVec3) -> CollisionSide {
 
 pub(crate) fn apply_physics(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<FixedTime>,
     transform: Query<(Entity, &FixedGlobalTransform), With<Collider>>,
     dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
     mut positions: Query<&mut FixedTransform>,
 ) {
-    let delta = Fx::from_num(time.delta_secs());
     for (current, mut rigid_body) in dynamic_rigid_body {
         let (_, global_transform) = transform.get(current).unwrap();
         let mut iter = SubstepIterator::new(
             global_transform.transform(),
-            rigid_body.velocity.x * delta,
-            rigid_body.velocity.y * delta,
-            rigid_body.velocity.z * delta,
+            rigid_body.velocity.x * time.delta_time(),
+            rigid_body.velocity.y * time.delta_time(),
+            rigid_body.velocity.z * time.delta_time(),
         );
 
         for (other, other_global_transform) in transform {

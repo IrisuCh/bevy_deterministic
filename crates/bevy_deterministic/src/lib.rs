@@ -14,18 +14,21 @@
 
 pub mod input;
 pub mod physics;
+mod resources;
 mod sync;
 pub mod tilemap;
 pub mod transform;
 
 use bevy::prelude::*;
 pub use fx::{Fx, IntoFx, const_fx, fx};
+pub use resources::FixedTime;
 pub use sync::SyncTarget;
 
 use crate::{
     physics::{
         PhysicsDebugManager, apply_velocity, draw_collider_debug_lines, prelude::apply_physics,
     },
+    resources::ResourcesPlugin,
     tilemap::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
     transform::{sync_fixed_global_transforms, sync_fixed_transforms, sync_transform},
 };
@@ -43,6 +46,7 @@ struct InternalDeterministicSet;
 pub struct GameplayPlugin;
 impl Plugin for GameplayPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(ResourcesPlugin);
         app.init_resource::<PhysicsDebugManager>();
 
         app.configure_sets(FixedUpdate, InternalDeterministicSet.after(PlayerLogicSet));
