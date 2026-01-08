@@ -8,6 +8,7 @@ pub struct FixedTime {
 }
 
 impl FixedTime {
+    #[must_use]
     pub const fn delta_time(&self) -> Fx {
         self.delta_time
     }
