@@ -77,8 +77,18 @@ impl FixedTransform {
     }
 
     #[inline]
+    pub fn rotate_x(&mut self, angle: f32) {
+        self.rotate(FQuat::from_rotation_x(angle));
+    }
+
+    #[inline]
     pub fn rotate_y(&mut self, angle: f32) {
         self.rotate(FQuat::from_rotation_y(angle));
+    }
+
+    #[inline]
+    pub fn rotate_z(&mut self, angle: f32) {
+        self.rotate(FQuat::from_rotation_z(angle));
     }
 }
 

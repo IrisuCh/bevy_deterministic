@@ -73,16 +73,28 @@ impl FQuat {
         }
     }
 
+    /// Creates a quaternion from the `angle` (in radians) around the x axis.
+    #[inline]
+    #[must_use]
+    pub fn from_rotation_x(angle: f32) -> Self {
+        let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
+        Self::new(s, Fx::ZERO, Fx::ZERO, c)
+    }
+
+    /// Creates a quaternion from the `angle` (in radians) around the y axis.
     #[inline]
     #[must_use]
     pub fn from_rotation_y(angle: f32) -> Self {
         let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
-        Self {
-            x: Fx::ZERO,
-            y: s,
-            z: Fx::ZERO,
-            w: c,
-        }
+        Self::new(Fx::ZERO, s, Fx::ZERO, c)
+    }
+
+    /// Creates a quaternion from the `angle` (in radians) around the z axis.
+    #[inline]
+    #[must_use]
+    pub fn from_rotation_z(angle: f32) -> Self {
+        let (s, c) = cordic::sin_cos(fx!(angle) * fx!(0.5));
+        Self::new(Fx::ZERO, Fx::ZERO, s, c)
     }
 
     /// Сопряжённый кватернион (обратное вращение)
