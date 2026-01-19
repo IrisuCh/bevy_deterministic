@@ -14,15 +14,10 @@ pub struct SubstepIterator {
 }
 
 impl SubstepIterator {
-    pub fn new(transform: FixedTransform, velocity_x: Fx, velocity_y: Fx, velocity_z: Fx) -> Self {
-        let step = FVec3 {
-            x: velocity_x / STEPS,
-            y: velocity_y / STEPS,
-            z: velocity_z / STEPS,
-        };
+    pub fn new(transform: FixedTransform, velocity: FVec3) -> Self {
         Self {
             transform,
-            step,
+            step: velocity / STEPS,
             steps: STEPS,
             completed: Fx::ZERO,
         }

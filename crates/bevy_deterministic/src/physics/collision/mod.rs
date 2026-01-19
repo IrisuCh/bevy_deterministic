@@ -129,12 +129,8 @@ pub(crate) fn apply_physics(
         let collider_transform = global_transform.transform();
         let collider_transform = collider.transform(&collider_transform);
 
-        let mut iter = SubstepIterator::new(
-            collider_transform,
-            rigid_body.velocity.x * time.delta_time(),
-            rigid_body.velocity.y * time.delta_time(),
-            rigid_body.velocity.z * time.delta_time(),
-        );
+        let mut iter =
+            SubstepIterator::new(collider_transform, rigid_body.velocity * time.delta_time());
 
         for (other, other_global_transform, other_collider) in transform {
             if current == other || other_collider.disabled {
