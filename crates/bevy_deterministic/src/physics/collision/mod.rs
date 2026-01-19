@@ -1,4 +1,5 @@
 mod aabb;
+mod collider;
 pub mod event;
 mod obb;
 mod side;
@@ -6,16 +7,13 @@ mod substep;
 
 use bevy::prelude::*;
 
-pub use crate::physics::collision::{aabb::Aabb, side::CollisionSide};
+pub use crate::physics::collision::{aabb::Aabb, collider::Collider, side::CollisionSide};
 use crate::{
     math::{FVec3, Fx, fx},
     physics::{
         KinematicRigidBody,
-        collision::{
-            event::{trigger_enter, trigger_exit, trigger_stay},
-            obb::Obb,
-            substep::SubstepIterator,
-        },
+        collision::{obb::Obb, substep::SubstepIterator},
+        prelude::event::{CollisionEnter, CollisionExit, CollisionStay},
     },
     resources::FixedTime,
     transform::{FixedGlobalTransform, FixedTransform},
@@ -23,66 +21,6 @@ use crate::{
 
 pub mod prelude {
     pub use super::*;
-}
-
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[require(FixedTransform)]
-pub struct Collider {
-    pub trigger: bool,
-    pub disabled: bool,
-    pub center: FVec3,
-    pub size: FVec3,
-}
-
-impl Default for Collider {
-    fn default() -> Self {
-        Self {
-            trigger: false,
-            disabled: false,
-            center: FVec3::ZERO,
-            size: FVec3::ONE,
-        }
-    }
-}
-
-impl Collider {
-    #[must_use]
-    pub fn trigger() -> Self {
-        Self {
-            trigger: true,
-            disabled: false,
-            ..default()
-        }
-    }
-
-    #[must_use]
-    pub fn disabled() -> Self {
-        Self {
-            trigger: false,
-            disabled: true,
-            ..default()
-        }
-    }
-
-    #[must_use]
-    pub fn with_size(mut self, size: FVec3) -> Self {
-        self.size = size;
-        self
-    }
-
-    #[must_use]
-    pub fn with_center(mut self, center: FVec3) -> Self {
-        self.center = center;
-        self
-    }
-
-    #[must_use]
-    pub fn transform(&self, transform: &FixedTransform) -> FixedTransform {
-        let mut transform = transform.clone();
-        transform.position += self.center;
-        transform.size *= self.size;
-        transform
-    }
 }
 
 fn normal_to_side(normal: FVec3) -> CollisionSide {
@@ -113,66 +51,98 @@ fn normal_to_side(normal: FVec3) -> CollisionSide {
     }
 }
 
+#[inline]
+fn get_rect(global_transform: &FixedGlobalTransform, collider: &Collider) -> Obb {
+    let local_transform = global_transform.as_local();
+    let collider_transform = collider.transform(&local_transform);
+    Obb::from_transform(
+        collider_transform.position,
+        collider_transform.size,
+        collider_transform.rotation,
+    )
+}
+
+#[inline]
+fn get_substep_iterator(
+    entity: Entity,
+    time: &FixedTime,
+    transform: &FixedGlobalTransform,
+    rigidbodies: &mut Query<&KinematicRigidBody>,
+) -> SubstepIterator {
+    let local_transform = transform.as_local();
+    if let Ok(rigidbody) = rigidbodies.get_mut(entity) {
+        SubstepIterator::new(local_transform, rigidbody.velocity * time.delta_time())
+    } else {
+        SubstepIterator::with_no_velocity(local_transform)
+    }
+}
+
 pub(crate) fn apply_physics(
     mut commands: Commands,
     time: Res<FixedTime>,
-    transform: Query<(Entity, &FixedGlobalTransform, &Collider)>,
-    dynamic_rigid_body: Query<(Entity, &mut KinematicRigidBody)>,
+    mut colliders: Query<(Entity, &FixedGlobalTransform, &mut Collider)>,
+    mut rigidbodies: Query<&KinematicRigidBody>,
     mut positions: Query<&mut FixedTransform>,
 ) {
-    for (current, mut rigid_body) in dynamic_rigid_body {
-        let (_, global_transform, collider) = transform.get(current).unwrap();
-        if collider.disabled {
+    let mut iter = colliders.iter_combinations_mut();
+    while let Some([(e1, transform1, mut collider1), (e2, transform2, collider2)]) =
+        iter.fetch_next()
+    {
+        if collider1.disabled || collider2.disabled {
             continue;
         }
 
-        let collider_transform = global_transform.transform();
-        let collider_transform = collider.transform(&collider_transform);
-
-        let mut iter =
-            SubstepIterator::new(collider_transform, rigid_body.velocity * time.delta_time());
-
-        for (other, other_global_transform, other_collider) in transform {
-            if current == other || other_collider.disabled {
-                continue;
+        let mut iter = get_substep_iterator(e1, &time, transform1, &mut rigidbodies);
+        let rect2 = get_rect(transform2, &collider2);
+        let Some(collision_info) = iter.next_overlap(&rect2) else {
+            if collider1.remove_other(e2) {
+                commands.trigger(CollisionExit {
+                    entity: e1,
+                    other: e2,
+                });
             }
+            continue;
+        };
 
-            let other_collider_transform = other_global_transform.transform();
-            let other_collider_transform = other_collider.transform(&other_collider_transform);
-
-            let other_rect = Obb::from_transform(
-                other_collider_transform.position,
-                other_collider_transform.size,
-                other_collider_transform.rotation,
-            );
-
-            let Some(collision_info) = iter.next_overlap(&other_rect) else {
-                if rigid_body.remove_other(other) {
-                    trigger_exit(current, other, &mut commands);
-                }
-                continue;
-            };
-
-            let position = &mut positions.get_mut(current).unwrap();
+        if !collider1.trigger {
+            let position = &mut positions.get_mut(e1).unwrap();
             position.position -= collision_info.normal * (collision_info.depth - fx!(f32::EPSILON));
-            block_movement_along_normal(collision_info.normal, &mut rigid_body.velocity);
+        }
 
-            let side = normal_to_side(collision_info.normal);
-            if rigid_body.has_other(other) {
-                trigger_stay(current, side, &mut commands);
-            } else {
-                rigid_body.insert_other(other, side);
-                trigger_enter(current, side, &mut commands);
-                trigger_stay(current, side, &mut commands);
-            }
+        let side = normal_to_side(collision_info.normal);
+        if collider1.has_other(e2) {
+            commands.trigger(CollisionStay {
+                entity: e1,
+                side,
+                info: collision_info,
+            });
+        } else {
+            collider1.insert_other(e2, side);
+            commands.trigger(CollisionEnter {
+                entity: e1,
+                side,
+                info: collision_info,
+            });
+
+            commands.trigger(CollisionStay {
+                entity: e1,
+                side,
+                info: collision_info,
+            });
         }
     }
 }
 
-fn block_movement_along_normal(normal: FVec3, velocity: &mut FVec3) {
-    let normal_vel = velocity.dot(normal);
-
-    if normal_vel > Fx::ZERO {
-        *velocity -= normal * normal_vel;
+pub(crate) fn block_rigidbody_movement_along_normal(
+    evt: On<CollisionStay>,
+    mut rigidbodies: Query<(&mut KinematicRigidBody, &Collider)>,
+) {
+    if let Ok((mut rigidbody, collider)) = rigidbodies.get_mut(evt.entity)
+        && !collider.trigger
+    {
+        let normal_vel = rigidbody.velocity.dot(evt.info.normal);
+        if normal_vel > Fx::ZERO {
+            rigidbody.velocity -= evt.info.normal * normal_vel;
+        }
     }
 }

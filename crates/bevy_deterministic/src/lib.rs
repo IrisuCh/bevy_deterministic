@@ -26,7 +26,8 @@ pub use sync::SyncTarget;
 
 use crate::{
     physics::{
-        PhysicsDebugManager, apply_velocity, draw_collider_debug_lines, prelude::apply_physics,
+        PhysicsDebugManager, apply_velocity, draw_collider_debug_lines,
+        prelude::{apply_physics, block_rigidbody_movement_along_normal},
     },
     resources::ResourcesPlugin,
     tilemap::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
@@ -72,6 +73,8 @@ impl Plugin for GameplayPlugin {
             )
                 .chain(),
         );
+
+        app.add_observer(block_rigidbody_movement_along_normal);
 
         app.add_systems(Update, (sync_transform, draw_collider_debug_lines).chain());
     }

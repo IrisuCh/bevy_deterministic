@@ -119,7 +119,7 @@ impl Obb {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct CollisionInfo {
     pub normal: FVec3, // Направление выталкивания
     pub depth: Fx,     // На сколько нужно сдвинуть

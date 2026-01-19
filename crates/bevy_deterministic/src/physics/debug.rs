@@ -22,10 +22,10 @@ pub(crate) fn draw_collider_debug_lines(
 
     for (transform, collider) in &query {
         let (pos, rotation, size): (FVec3, FQuat, FVec3) =
-            collider.transform(&transform.transform()).into();
+            collider.transform(&transform.as_local()).into();
         let position = (pos + size / fx!(2.0)).as_vec3();
 
-        gizmos.cuboid(
+        gizmos.cube(
             Transform::from_translation(position)
                 .with_scale(size.as_vec3())
                 .with_rotation(rotation.as_quat()),

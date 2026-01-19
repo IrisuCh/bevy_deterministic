@@ -176,7 +176,7 @@ pub struct FixedGlobalTransform {
 
 impl FixedGlobalTransform {
     #[must_use]
-    pub const fn transform(&self) -> FixedTransform {
+    pub const fn as_local(&self) -> FixedTransform {
         FixedTransform {
             position: self.position,
             rotation: self.rotation,

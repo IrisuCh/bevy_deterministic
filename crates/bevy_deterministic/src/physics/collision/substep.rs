@@ -14,6 +14,15 @@ pub struct SubstepIterator {
 }
 
 impl SubstepIterator {
+    pub fn with_no_velocity(transform: FixedTransform) -> Self {
+        Self {
+            transform,
+            step: FVec3::ZERO,
+            steps: Fx::ONE,
+            completed: Fx::ZERO,
+        }
+    }
+
     pub fn new(transform: FixedTransform, velocity: FVec3) -> Self {
         Self {
             transform,
