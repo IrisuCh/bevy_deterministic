@@ -1,53 +1,87 @@
 mod aabb;
-mod event;
+pub mod event;
+mod obb;
 mod side;
 mod substep;
-
-use std::f32;
 
 use bevy::prelude::*;
 
 pub use crate::physics::collision::{aabb::Aabb, side::CollisionSide};
 use crate::{
-    Fx, fx,
+    math::{FVec3, Fx, fx},
     physics::{
         KinematicRigidBody,
         collision::{
-            aabb::Obb,
             event::{trigger_enter, trigger_exit, trigger_stay},
+            obb::Obb,
             substep::SubstepIterator,
         },
     },
     resources::FixedTime,
-    transform::{FVec3, FixedGlobalTransform, FixedTransform},
+    transform::{FixedGlobalTransform, FixedTransform},
 };
 
 pub mod prelude {
     pub use super::*;
 }
 
-#[derive(Component, Reflect, Debug, Default)]
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[require(FixedTransform)]
 pub struct Collider {
     pub trigger: bool,
     pub disabled: bool,
+    pub center: FVec3,
+    pub size: FVec3,
+}
+
+impl Default for Collider {
+    fn default() -> Self {
+        Self {
+            trigger: false,
+            disabled: false,
+            center: FVec3::ZERO,
+            size: FVec3::ONE,
+        }
+    }
 }
 
 impl Collider {
     #[must_use]
-    pub const fn trigger() -> Self {
+    pub fn trigger() -> Self {
         Self {
             trigger: true,
             disabled: false,
+            ..default()
         }
     }
 
     #[must_use]
-    pub const fn disabled() -> Self {
+    pub fn disabled() -> Self {
         Self {
             trigger: false,
             disabled: true,
+            ..default()
         }
+    }
+
+    #[must_use]
+    pub fn with_size(mut self, size: FVec3) -> Self {
+        self.size = size;
+        self
+    }
+
+    #[must_use]
+    pub fn with_center(mut self, center: FVec3) -> Self {
+        self.center = center;
+        self
+    }
+
+    #[must_use]
+    pub fn transform(&self, transform: &FixedTransform) -> FixedTransform {
+        let mut transform = transform.clone();
+        transform.position += self.center;
+        transform.size *= self.size;
+        transform
     }
 }
 
@@ -92,8 +126,11 @@ pub(crate) fn apply_physics(
             continue;
         }
 
+        let collider_transform = global_transform.transform();
+        let collider_transform = collider.transform(&collider_transform);
+
         let mut iter = SubstepIterator::new(
-            global_transform.transform(),
+            collider_transform,
             rigid_body.velocity.x * time.delta_time(),
             rigid_body.velocity.y * time.delta_time(),
             rigid_body.velocity.z * time.delta_time(),
@@ -104,10 +141,13 @@ pub(crate) fn apply_physics(
                 continue;
             }
 
+            let other_collider_transform = other_global_transform.transform();
+            let other_collider_transform = other_collider.transform(&other_collider_transform);
+
             let other_rect = Obb::from_transform(
-                other_global_transform.position(),
-                other_global_transform.size(),
-                other_global_transform.rotation(),
+                other_collider_transform.position,
+                other_collider_transform.size,
+                other_collider_transform.rotation,
             );
 
             let Some(collision_info) = iter.next_overlap(&other_rect) else {

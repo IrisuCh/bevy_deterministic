@@ -13,6 +13,7 @@
 #![deny(clippy::disallowed_types)]
 
 pub mod input;
+pub mod math;
 pub mod physics;
 mod resources;
 mod sync;
@@ -20,7 +21,6 @@ pub mod tilemap;
 pub mod transform;
 
 use bevy::prelude::*;
-pub use fx::{Fx, IntoFx, const_fx, fx};
 pub use resources::FixedTime;
 pub use sync::SyncTarget;
 

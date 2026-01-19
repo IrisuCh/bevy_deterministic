@@ -1,7 +1,7 @@
 use crate::{
-    Fx,
-    physics::collision::aabb::{CollisionInfo, Obb},
-    transform::{FVec3, FixedTransform},
+    math::{FVec3, Fx},
+    physics::collision::obb::{CollisionInfo, Obb},
+    transform::FixedTransform,
 };
 
 const STEPS: Fx = Fx::const_from_int(16);

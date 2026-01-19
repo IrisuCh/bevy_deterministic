@@ -3,8 +3,8 @@ use strum::EnumCount;
 
 use crate::{
     DetMap,
+    math::FVec3,
     physics::collision::{Collider, CollisionSide},
-    transform::FVec3,
 };
 
 #[derive(Component, Reflect, Debug, Default)]
@@ -18,6 +18,14 @@ pub struct KinematicRigidBody {
 }
 
 impl KinematicRigidBody {
+    pub fn freezed() -> Self {
+        Self {
+            velocity: FVec3::ZERO,
+            freeze: true,
+            history: EntityList::default(),
+        }
+    }
+
     #[inline]
     pub(crate) fn insert_other(&mut self, other: Entity, side: CollisionSide) {
         self.history.insert_other(other, side);

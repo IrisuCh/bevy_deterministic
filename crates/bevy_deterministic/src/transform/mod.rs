@@ -1,12 +1,10 @@
-mod direction;
-mod fquat;
-mod fvec3;
-
 use bevy::prelude::*;
 use fx::IntoFx;
 
-pub use crate::transform::{fquat::FQuat, fvec3::FVec3};
-use crate::{sync::SyncTarget, transform::direction::FDir3};
+use crate::{
+    math::{FDir3, FQuat, FVec3},
+    sync::SyncTarget,
+};
 
 pub mod prelude {
     pub use super::*;
@@ -150,6 +148,22 @@ impl FixedTransform {
     #[must_use]
     pub fn back(&self) -> FDir3 {
         self.local_z()
+    }
+}
+
+impl From<(FVec3, FQuat, FVec3)> for FixedTransform {
+    fn from((position, rotation, size): (FVec3, FQuat, FVec3)) -> Self {
+        Self {
+            position,
+            rotation,
+            size,
+        }
+    }
+}
+
+impl From<FixedTransform> for (FVec3, FQuat, FVec3) {
+    fn from(val: FixedTransform) -> Self {
+        (val.position, val.rotation, val.size)
     }
 }
 

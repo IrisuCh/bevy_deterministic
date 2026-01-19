@@ -3,7 +3,7 @@ use std::ops::Mul;
 use bevy::prelude::*;
 use fx::IntoFx;
 
-use crate::{Fx, fx, transform::FVec3};
+use crate::math::{FVec3, Fx, fx};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FQuat {

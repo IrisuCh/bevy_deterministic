@@ -1,10 +1,10 @@
-use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use bevy::prelude::*;
 use fx::IntoFx;
 use serde::{Deserialize, Serialize};
 
-use crate::Fx;
+use crate::math::Fx;
 
 #[derive(
     Reflect,
@@ -309,5 +309,21 @@ impl From<Vec3> for FVec3 {
     #[inline]
     fn from(value: Vec3) -> Self {
         Self::new(value.x, value.y, value.z)
+    }
+}
+
+impl MulAssign for FVec3 {
+    fn mul_assign(&mut self, rhs: Self) {
+        self.x *= rhs.x;
+        self.y *= rhs.y;
+        self.z *= rhs.z;
+    }
+}
+
+impl MulAssign<Fx> for FVec3 {
+    fn mul_assign(&mut self, rhs: Fx) {
+        self.x *= rhs;
+        self.y *= rhs;
+        self.z *= rhs;
     }
 }

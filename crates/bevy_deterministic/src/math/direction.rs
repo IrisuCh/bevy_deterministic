@@ -1,8 +1,8 @@
 use derive_more::Into;
-#[cfg(debug_assertions)]
-use fx::Fx;
 
-use crate::transform::FVec3;
+use crate::math::FVec3;
+#[cfg(debug_assertions)]
+use crate::math::Fx;
 
 /// Checks that a vector with the given squared length is normalized.
 ///

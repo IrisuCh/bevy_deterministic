@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{Fx, fx};
+use crate::math::{Fx, fx};
 
 #[derive(Resource, Default)]
 pub struct FixedTime {
