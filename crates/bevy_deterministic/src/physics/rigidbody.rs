@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use fx::IntoFx;
 
 use crate::{math::FVec3, physics::collision::Collider};
 
@@ -16,5 +17,15 @@ impl KinematicRigidBody {
             velocity: FVec3::ZERO,
             freeze: true,
         }
+    }
+
+    pub fn set_velocity_xz3(&mut self, vec: FVec3) {
+        self.velocity.x = vec.x;
+        self.velocity.z = vec.z;
+    }
+
+    pub fn set_velocity_xz(&mut self, x: impl IntoFx, z: impl IntoFx) {
+        self.velocity.x = x.into_fx();
+        self.velocity.z = z.into_fx();
     }
 }
