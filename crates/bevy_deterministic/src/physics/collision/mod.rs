@@ -104,7 +104,7 @@ pub(crate) fn apply_physics(
             continue;
         };
 
-        if !collider1.trigger {
+        if !collider1.trigger && !collider1.fixed {
             let position = &mut positions.get_mut(e1).unwrap();
             position.position -= collision_info.normal * (collision_info.depth - fx!(f32::EPSILON));
         }

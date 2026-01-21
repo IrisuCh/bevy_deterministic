@@ -8,6 +8,7 @@ use crate::{DetMap, math::FVec3, physics::prelude::CollisionSide, transform::Fix
 pub struct Collider {
     pub trigger: bool,
     pub disabled: bool,
+    pub fixed: bool,
     pub center: FVec3,
     pub size: FVec3,
 
@@ -19,6 +20,7 @@ impl Default for Collider {
         Self {
             trigger: false,
             disabled: false,
+            fixed: false,
             center: FVec3::ZERO,
             size: FVec3::ONE,
             history: EntityList::default(),
@@ -43,6 +45,34 @@ impl Collider {
             disabled: true,
             ..default()
         }
+    }
+
+    #[must_use]
+    pub fn fixed() -> Self {
+        Self {
+            trigger: false,
+            disabled: false,
+            fixed: true,
+            ..default()
+        }
+    }
+
+    #[must_use]
+    pub fn with_disabled(mut self, disabled: bool) -> Self {
+        self.disabled = disabled;
+        self
+    }
+
+    #[must_use]
+    pub fn with_trigger(mut self, trigger: bool) -> Self {
+        self.trigger = trigger;
+        self
+    }
+
+    #[must_use]
+    pub fn with_fixed(mut self, fixed: bool) -> Self {
+        self.fixed = fixed;
+        self
     }
 
     #[must_use]
