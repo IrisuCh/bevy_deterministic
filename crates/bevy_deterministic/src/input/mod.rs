@@ -1,8 +1,9 @@
 mod action;
 mod key;
 mod macros;
+mod xd;
 
-use std::fmt::Debug;
+use core::fmt::Debug;
 
 use bevy::prelude::*;
 
@@ -23,13 +24,13 @@ pub mod prelude {
 }
 
 pub struct InputPlugin<O: Send + Sync + 'static> {
-    _phantom: std::marker::PhantomData<O>,
+    _phantom: core::marker::PhantomData<O>,
 }
 
 impl<O: Send + Sync + 'static> Default for InputPlugin<O> {
     fn default() -> Self {
         Self {
-            _phantom: std::marker::PhantomData,
+            _phantom: core::marker::PhantomData,
         }
     }
 }

@@ -1,3 +1,5 @@
+/*
+
 use bevy::prelude::*;
 
 use crate::{
@@ -79,3 +81,4 @@ pub(crate) fn split_by_chunks(
         }
     }
 }
+*/

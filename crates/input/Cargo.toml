@@ -1,0 +1,12 @@
+[package]
+name = "input"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fixed_math.workspace = true
+bridge.workspace = true
+
+[dependencies.bevy]
+workspace = true
+default-features = true

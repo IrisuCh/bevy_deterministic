@@ -1,7 +1,8 @@
+/*
 mod chunk;
 
 use bevy::prelude::*;
-use fx::Fx;
+use fixed_math::Fx;
 use serde::{Deserialize, Serialize};
 
 pub(crate) use crate::tilemap::chunk::split_by_chunks;
@@ -150,3 +151,4 @@ impl OnChunkSpawn for CollisionBackend {
         commands.entity(entity).insert(Collider::default());
     }
 }
+*/

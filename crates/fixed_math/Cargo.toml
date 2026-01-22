@@ -1,0 +1,11 @@
+[package]
+name = "fixed_math"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fixed.workspace = true
+derive_more.workspace = true
+bevy.workspace = true
+serde.workspace = true
+cordic.workspace = true

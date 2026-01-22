@@ -1,0 +1,15 @@
+[package]
+name = "physics"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fixed_math.workspace = true
+bevy_deterministic.workspace = true
+bridge.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
+
+[dependencies.bevy]
+workspace = true
+default-features = false

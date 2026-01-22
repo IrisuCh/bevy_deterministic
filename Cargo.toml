@@ -1,12 +1,24 @@
 [workspace]
 resolver = "3"
-members = ["crates/bevy_deterministic", "crates/fx"]
+members = [
+    "crates/bevy_deterministic",
+    "crates/bridge",
+    "crates/fixed_math",
+    "crates/input",
+    "crates/physics",
+    "crates/plugin",
+    "crates/render",
+    "crates/sync",
+]
 
 [workspace.dependencies]
-fx = { path = "crates/fx" }
+fixed_math = { path = "crates/fixed_math" }
+bevy_deterministic = { path = "crates/bevy_deterministic" }
+bridge = { path = "crates/bridge" }
+sync = { path = "crates/sync" }
+physics = { path = "crates/physics" }
 
-bevy = "0.18.0"
-fixed = { version = "1.29.0", features = ["serde"] }
+fixed = { version = "1.30.0", features = ["serde"] }
 serde = { version = "1.0.228", features = ["derive"] }
 strum = "0.27.2"
 strum_macros = "0.27.2"
@@ -14,3 +26,8 @@ rustc-hash = "2.1.1"
 indexmap = "2.13.0"
 cordic = "0.1.5"
 derive_more = "2.1.1"
+impl-trait-for-tuples = "0.2.3"
+
+[workspace.dependencies.bevy]
+version = "0.18.0"
+default-features = false

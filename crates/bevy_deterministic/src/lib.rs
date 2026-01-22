@@ -1,3 +1,4 @@
+#![no_std]
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::type_complexity)]
@@ -13,30 +14,21 @@
 #![deny(clippy::disallowed_types)]
 
 pub mod input;
-pub mod math;
-pub mod physics;
-mod resources;
-mod sync;
+pub mod main;
 pub mod tilemap;
-pub mod transform;
 
 use bevy::prelude::*;
-pub use resources::FixedTime;
-pub use sync::SyncTarget;
+pub mod math {
+    pub use fixed_math::*;
+}
 
-use crate::{
-    physics::{
-        PhysicsDebugManager, apply_velocity, draw_collider_debug_lines,
-        prelude::{apply_physics, block_rigidbody_movement_along_normal},
-    },
-    resources::ResourcesPlugin,
-    tilemap::{CollisionBackend, on_chunk_spawn, set_tiles_position, split_by_chunks},
-    transform::{sync_fixed_global_transforms, sync_fixed_transforms, sync_transform},
-};
-
-#[allow(clippy::disallowed_types)]
-pub type DetMap<K, V> =
-    indexmap::IndexMap<K, V, std::hash::BuildHasherDefault<rustc_hash::FxHasher>>;
+//use crate::{
+//    physics::{
+//        apply_material_friction, apply_velocity,
+//        prelude::{apply_physics, block_rigidbody_movement_along_normal},
+//    },
+//    transform::{sync_fixed_global_transforms, sync_fixed_transforms},
+//};
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlayerLogicSet;
@@ -47,43 +39,22 @@ struct InternalDeterministicSet;
 pub struct GameplayPlugin;
 impl Plugin for GameplayPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(ResourcesPlugin);
-        app.init_resource::<PhysicsDebugManager>();
-
         app.configure_sets(FixedUpdate, InternalDeterministicSet.after(PlayerLogicSet));
 
-        app.add_systems(
-            FixedUpdate,
-            (
-                (
-                    set_tiles_position,
-                    split_by_chunks,
-                    on_chunk_spawn::<CollisionBackend>,
-                )
-                    .chain()
-                    .in_set(PlayerLogicSet),
-                (
-                    apply_physics,
-                    apply_velocity,
-                    sync_fixed_global_transforms,
-                    sync_fixed_transforms,
-                )
-                    .chain()
-                    .in_set(InternalDeterministicSet),
-            )
-                .chain(),
-        );
+        //app.add_systems(
+        //    FixedUpdate,
+        //    ((
+        //        apply_physics,
+        //        apply_material_friction,
+        //        apply_velocity,
+        //        sync_fixed_global_transforms,
+        //        sync_fixed_transforms,
+        //    )
+        //        .chain()
+        //        .in_set(InternalDeterministicSet),)
+        //        .chain(),
+        //);
 
-        app.add_observer(block_rigidbody_movement_along_normal);
-
-        app.add_systems(Update, (sync_transform, draw_collider_debug_lines).chain());
+        //app.add_observer(block_rigidbody_movement_along_normal);
     }
 }
-
-/*
- * Some work
- * Edit velocity
- * Apply physics
- * Apply velocity
- * Sync
- */

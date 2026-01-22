@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fx.workspace = true
+fixed_math.workspace = true
 
-bevy.workspace = true
 serde.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
@@ -14,3 +13,7 @@ indexmap.workspace = true
 rustc-hash.workspace = true
 cordic.workspace = true
 derive_more.workspace = true
+
+[dependencies.bevy]
+workspace = true
+features = ["critical-section", "bevy_state", "bevy_winit"]

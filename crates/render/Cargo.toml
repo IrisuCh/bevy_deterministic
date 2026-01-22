@@ -1,0 +1,10 @@
+[package]
+name = "render"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy_deterministic.workspace = true
+bevy = { workspace = true, default-features = true }
+physics.workspace = true
+bridge.workspace = true
