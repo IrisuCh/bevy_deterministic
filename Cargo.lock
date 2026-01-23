@@ -3746,6 +3746,7 @@ dependencies = [
  "whitelace_core",
  "whitelace_physics",
  "whitelace_sync",
+ "whitelace_tilemap",
  "whitelace_time",
  "whitelace_transform",
 ]
@@ -5165,6 +5166,18 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "whitelace_core",
+]
+
+[[package]]
+name = "whitelace_tilemap"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "serde",
+ "whitelace_core",
+ "whitelace_physics",
+ "whitelace_sync",
+ "whitelace_transform",
 ]
 
 [[package]]

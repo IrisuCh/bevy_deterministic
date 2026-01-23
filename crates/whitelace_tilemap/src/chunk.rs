@@ -1,11 +1,19 @@
-/*
-
-use bevy::prelude::*;
-
-use crate::{
-    tilemap::{TilemapSize, TilemapStorage},
-    transform::FixedTransform,
+use bevy::{
+    ecs::{
+        component::Component,
+        entity::Entity,
+        hierarchy::ChildOf,
+        name::Name,
+        query::Changed,
+        system::{Commands, Query},
+    },
+    platform::prelude::vec::Vec,
+    prelude::vec,
+    reflect::Reflect,
 };
+use whitelace_transform::FixedTransform;
+
+use crate::{TilemapSize, TilemapStorage};
 
 #[derive(Component, Reflect, Default)]
 #[relationship_target(relationship = AttachedToChunk, linked_spawn)]
@@ -38,8 +46,8 @@ pub(crate) fn split_by_chunks(
         let map_w = size.width;
         let map_h = size.height;
 
-        let chunk_rows = (map_h + CHUNK_H - 1) / CHUNK_H;
-        let chunk_cols = (map_w + CHUNK_W - 1) / CHUNK_W;
+        let chunk_rows = map_h.div_ceil(CHUNK_H);
+        let chunk_cols = map_w.div_ceil(CHUNK_W);
 
         for cy in 0..chunk_rows {
             for cx in 0..chunk_cols {
@@ -81,4 +89,3 @@ pub(crate) fn split_by_chunks(
         }
     }
 }
-*/

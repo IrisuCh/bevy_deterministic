@@ -1,13 +1,12 @@
 [package]
-name = "plugin"
+name = "whitelace_tilemap"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 bevy.workspace = true
-whitelace_core.workspace = true
-whitelace_sync.workspace = true
-whitelace_time.workspace = true
 whitelace_transform.workspace = true
+whitelace_core.workspace = true
+serde.workspace = true
 whitelace_physics.workspace = true
-whitelace_tilemap.workspace = true
+whitelace_sync.workspace = true

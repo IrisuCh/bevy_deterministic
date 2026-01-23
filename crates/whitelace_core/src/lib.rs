@@ -16,20 +16,11 @@
 pub mod input;
 pub mod main;
 pub mod map;
-pub mod tilemap;
 
 use bevy::prelude::*;
 pub mod math {
     pub use fixed_math::*;
 }
-
-//use crate::{
-//    physics::{
-//        apply_material_friction, apply_velocity,
-//        prelude::{apply_physics, block_rigidbody_movement_along_normal},
-//    },
-//    transform::{sync_fixed_global_transforms, sync_fixed_transforms},
-//};
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlayerLogicSet;

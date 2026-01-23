@@ -1,13 +1,18 @@
-/*
+#![allow(clippy::type_complexity)]
+#![allow(clippy::missing_panics_doc)]
+#![no_std]
+
 mod chunk;
 
 use bevy::prelude::*;
-use fixed_math::Fx;
 use serde::{Deserialize, Serialize};
+use whitelace_core::{main::schedule::Logic, math::Fx};
+use whitelace_physics::collision::Collider;
+use whitelace_sync::{MultiworldApp, WorldLabel};
+use whitelace_transform::FixedTransform;
 
-pub(crate) use crate::tilemap::chunk::split_by_chunks;
-pub use crate::tilemap::chunk::{Chunk, ChunkStorage};
-use crate::{physics::collision::Collider, transform::FixedTransform};
+use crate::chunk::split_by_chunks;
+pub use crate::chunk::{Chunk, ChunkStorage};
 
 #[derive(Component, Reflect)]
 pub struct TilemapSize {
@@ -116,7 +121,7 @@ impl TilemapStorage {
     }
 }
 
-pub(crate) fn set_tiles_position(
+fn set_tiles_position(
     storages: Query<(&TileSize, &TilePadding), With<TilemapStorage>>,
     tiles: Query<
         (&mut FixedTransform, &TilePosition, &ChildOf),
@@ -151,4 +156,21 @@ impl OnChunkSpawn for CollisionBackend {
         commands.entity(entity).insert(Collider::default());
     }
 }
-*/
+
+pub struct TilemapPlugin<W: WorldLabel> {
+    _phantom: core::marker::PhantomData<W>,
+}
+
+impl<W: WorldLabel + Default> Plugin for TilemapPlugin<W> {
+    fn build(&self, app: &mut App) {
+        app.add_world_systems(
+            W::default(),
+            Logic,
+            (
+                set_tiles_position,
+                split_by_chunks,
+                on_chunk_spawn::<CollisionBackend>,
+            ),
+        );
+    }
+}
