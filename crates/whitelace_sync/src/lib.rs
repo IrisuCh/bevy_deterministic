@@ -1,3 +1,4 @@
+#![allow(clippy::missing_panics_doc)]
 #![allow(clippy::needless_pass_by_value)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_safety_doc)]
@@ -17,7 +18,7 @@ use bevy::{
         intern::Interned,
         query::{QueryData, QueryFilter, QueryIter},
         schedule::ScheduleLabel,
-        system::{IntoObserverSystem, ScheduleSystem},
+        system::{IntoObserverSystem, ScheduleSystem, SystemParam},
     },
     prelude::*,
 };
@@ -509,6 +510,39 @@ impl MultiworldApp for App {
             world.add_observer(observer);
         }
         self
+    }
+}
+
+#[derive(SystemParam)]
+pub struct MultiworldCommands<'w, 's> {
+    pub commands: Commands<'w, 's>,
+    worlds: ResMut<'w, Worlds>,
+}
+
+impl<'w> MultiworldCommands<'w, '_> {
+    pub fn spawn_at(
+        &'w mut self,
+        label: impl WorldLabel,
+        target: impl Bundle,
+        visual: impl Bundle,
+    ) -> (Entity, EntityCommands<'w>) {
+        let world = self.worlds.get_mut(label).unwrap();
+        let mut other_commands = world.commands();
+        let other = other_commands.spawn(target).id();
+        let mut visual = self.commands.spawn(visual);
+        visual.insert(SyncTarget(other));
+        (other, visual)
+    }
+
+    pub fn spawn_empty_at(&mut self, label: impl WorldLabel, target: impl Bundle) -> Entity {
+        let world = self.worlds.get_mut(label).unwrap();
+        let mut other_commands = world.commands();
+        other_commands.spawn(target).id()
+    }
+
+    pub fn world_commands(&mut self, label: impl WorldLabel) -> Commands<'_, '_> {
+        let world = self.worlds.get_mut(label).unwrap();
+        world.commands()
     }
 }
 
