@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::main::{DPlugin, DeterministicWorld, input::UserInput};
+use crate::main::{DPlugin, Subworld, input::UserInput};
 
 #[derive(Resource, Debug)]
 struct ScheduleOrder {
@@ -39,7 +39,7 @@ pub struct Logic;
 
 pub struct SchedulePlugin;
 impl<I: UserInput> DPlugin<I> for SchedulePlugin {
-    fn build(&self, app: &mut DeterministicWorld<I>) {
+    fn build(&self, app: &mut Subworld<I>) {
         let mut fixed_schedule = Schedule::new(FixedSchedule);
         fixed_schedule.set_executor_kind(ExecutorKind::SingleThreaded);
         app.init_resource::<ScheduleOrder>();

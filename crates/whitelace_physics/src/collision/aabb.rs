@@ -1,4 +1,4 @@
-use bevy_deterministic::math::{FQuat, FVec3, Fx, IntoFx};
+use whitelace_core::math::{FQuat, FVec3, Fx, IntoFx};
 
 use crate::collision::obb::Obb;
 
@@ -26,20 +26,20 @@ impl Aabb {
         x: impl IntoFx,
         y: impl IntoFx,
         z: impl IntoFx,
-        w: impl IntoFx,
-        h: impl IntoFx,
-        d: impl IntoFx,
+        width: impl IntoFx,
+        height: impl IntoFx,
+        depth: impl IntoFx,
     ) -> Self {
         let x = x.into_fx();
         let y = y.into_fx();
         let z = z.into_fx();
-        let w = w.into_fx();
-        let h = h.into_fx();
-        let d = d.into_fx();
+        let width = width.into_fx();
+        let height = height.into_fx();
+        let depth = depth.into_fx();
 
         Self {
             min: FVec3::new(x, y, z),
-            max: FVec3::new(x + w, y + h, z + d),
+            max: FVec3::new(x + width, y + height, z + depth),
         }
     }
 

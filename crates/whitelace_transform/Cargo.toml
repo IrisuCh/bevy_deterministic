@@ -1,11 +1,12 @@
 [package]
-name = "input"
+name = "whitelace_transform"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 fixed_math.workspace = true
+whitelace_core.workspace = true
+whitelace_sync.workspace = true
 
 [dependencies.bevy]
 workspace = true
-default-features = true

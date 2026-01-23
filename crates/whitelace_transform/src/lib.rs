@@ -1,5 +1,10 @@
+#![allow(clippy::needless_pass_by_value)]
+#![no_std]
+
 use bevy::prelude::*;
 use fixed_math::{FDir3, FQuat, FVec3, IntoFx};
+use whitelace_core::main::schedule::Physics;
+use whitelace_sync::{MultiworldApp, SyncTarget, WorldLabel, WorldQuery};
 
 pub mod prelude {
     pub use super::*;
@@ -221,5 +226,43 @@ pub(crate) fn sync_fixed_transforms(
                 child_global.rotation = (global_rotation * child_local.rotation).normalize();
             }
         }
+    }
+}
+
+pub struct TransformPlugin<W: WorldLabel> {
+    _marker: core::marker::PhantomData<W>,
+}
+
+impl<W: WorldLabel> Default for TransformPlugin<W> {
+    fn default() -> Self {
+        Self {
+            _marker: core::marker::PhantomData,
+        }
+    }
+}
+
+impl<W: WorldLabel + Default> Plugin for TransformPlugin<W> {
+    fn build(&self, app: &mut App) {
+        app.add_world_systems(
+            W::default(),
+            Physics,
+            (sync_fixed_global_transforms, sync_fixed_transforms),
+        );
+
+        app.add_sync_system(sync_transform::<W>);
+    }
+}
+
+fn sync_transform<W: WorldLabel>(
+    from: WorldQuery<&FixedTransform, (), W>,
+    mut to: WorldQuery<(&mut Transform, &SyncTarget)>,
+) {
+    for (mut transform, sync) in &mut to.iter_mut() {
+        let fixed_transform = from.get(sync.0).unwrap();
+
+        transform.translation =
+            fixed_transform.position.as_vec3() + fixed_transform.size.as_vec3() / 2.0;
+        transform.scale = fixed_transform.size.as_vec3();
+        transform.rotation = fixed_transform.rotation.as_quat();
     }
 }

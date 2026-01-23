@@ -15,6 +15,7 @@
 
 pub mod input;
 pub mod main;
+pub mod map;
 pub mod tilemap;
 
 use bevy::prelude::*;

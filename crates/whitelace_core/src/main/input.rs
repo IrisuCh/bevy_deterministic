@@ -15,6 +15,8 @@ impl<I: UserInput> SystemInput for InputBuffer<I> {
 
 pub trait UserInput: Send + Sync + 'static {}
 
+impl UserInput for () {}
+
 #[derive(Resource)]
 pub struct FrameInput<I: UserInput> {
     history: Vec<I>,

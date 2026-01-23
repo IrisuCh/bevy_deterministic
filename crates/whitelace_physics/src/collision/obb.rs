@@ -1,4 +1,4 @@
-use bevy_deterministic::math::{FQuat, FVec3, Fx, fx};
+use whitelace_core::math::{FQuat, FVec3, Fx, fx};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Obb {

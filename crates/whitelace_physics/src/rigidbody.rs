@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_deterministic::math::{FVec3, Fx, IntoFx, fx};
-use bridge::{Time, transform::FixedTransform};
+use whitelace_core::math::{FVec3, Fx, IntoFx, fx};
+use whitelace_time::Time;
+use whitelace_transform::FixedTransform;
 
 use crate::collision::Collider;
 

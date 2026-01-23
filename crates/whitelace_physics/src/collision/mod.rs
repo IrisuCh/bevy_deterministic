@@ -6,11 +6,9 @@ mod side;
 mod substep;
 
 use bevy::prelude::*;
-use bevy_deterministic::math::{FVec3, Fx, fx};
-use bridge::{
-    Time,
-    transform::{FixedGlobalTransform, FixedTransform},
-};
+use whitelace_core::math::{FVec3, Fx, fx};
+use whitelace_time::Time;
+use whitelace_transform::{FixedGlobalTransform, FixedTransform};
 
 pub use crate::collision::{aabb::Aabb, collider::Collider, side::CollisionSide};
 use crate::{

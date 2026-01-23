@@ -1,8 +1,10 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use bevy::prelude::*;
-use bridge::transform::FixedTransform;
-use sync::{MultiworldApp, SyncPlugin, SyncTarget, WorldLabel, WorldQuery};
+use bevy::app::{App, Plugin};
+use whitelace_physics::PhysicsPlugin;
+use whitelace_sync::{SyncPlugin, WorldLabel};
+use whitelace_time::TimePlugin;
+use whitelace_transform::TransformPlugin;
 
 #[derive(Default, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct LogicWorld;
@@ -19,20 +21,8 @@ pub struct WhitelacePlugin;
 impl Plugin for WhitelacePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(SyncPlugin);
-        app.add_sync_system(sync_transform);
-    }
-}
-
-fn sync_transform(
-    from: WorldQuery<&FixedTransform, (), LogicWorld>,
-    mut to: WorldQuery<(&mut Transform, &SyncTarget)>,
-) {
-    for (mut transform, sync) in &mut to.iter_mut() {
-        let fixed_transform = from.get(sync.0).unwrap();
-
-        transform.translation =
-            fixed_transform.position.as_vec3() + fixed_transform.size.as_vec3() / 2.0;
-        transform.scale = fixed_transform.size.as_vec3();
-        transform.rotation = fixed_transform.rotation.as_quat();
+        app.add_plugins(TimePlugin::<LogicWorld>::default());
+        app.add_plugins(TransformPlugin::<LogicWorld>::default());
+        app.add_plugins(PhysicsPlugin::<LogicWorld>::default());
     }
 }

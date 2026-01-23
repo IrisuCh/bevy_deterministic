@@ -16,25 +16,27 @@ use bevy::{
         define_label,
         intern::Interned,
         query::{QueryData, QueryFilter, QueryIter},
+        schedule::ScheduleLabel,
+        system::{IntoObserverSystem, ScheduleSystem},
     },
     prelude::*,
 };
-use bridge::Map;
+use whitelace_core::{main::Subworld, map::Map};
 
 #[derive(Component, Debug, Deref, DerefMut, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct SyncTarget(pub Entity);
 
 #[derive(Default, Resource)]
 pub struct Worlds {
-    inner: Map<Interned<dyn WorldLabel + 'static>, World>,
+    inner: Map<Interned<dyn WorldLabel + 'static>, Subworld>,
 }
 
 impl Worlds {
-    pub fn get(&self, label: impl WorldLabel) -> Option<&World> {
+    pub fn get(&self, label: impl WorldLabel) -> Option<&Subworld> {
         self.inner.get(&label.intern())
     }
 
-    pub fn get_mut(&mut self, label: impl WorldLabel) -> Option<&mut World> {
+    pub fn get_mut(&mut self, label: impl WorldLabel) -> Option<&mut Subworld> {
         self.inner.get_mut(&label.intern())
     }
 }
@@ -50,6 +52,8 @@ impl WorldLabel for MainWorld {
     }
 }
 
+define_label!(WorldLabel, WORLD_LABEL_INTERNER);
+
 pub struct WorldResMut<'worlds, R: Resource, W: WorldLabel = MainWorld> {
     _resource: core::marker::PhantomData<R>,
     label: W,
@@ -57,7 +61,22 @@ pub struct WorldResMut<'worlds, R: Resource, W: WorldLabel = MainWorld> {
     worlds: &'worlds mut Worlds,
 }
 
-define_label!(WorldLabel, WORLD_LABEL_INTERNER);
+impl<W: WorldLabel + Default, R: Resource> WorldSystemParam for WorldResMut<'_, R, W> {
+    type State = ();
+
+    fn init_state(_: &mut World) -> Self::State {}
+
+    unsafe fn get_param((): Self::State, ctx: &SystemContext) -> Self {
+        unsafe {
+            Self {
+                _resource: core::marker::PhantomData,
+                label: W::default(),
+                main: &mut *ctx.main,
+                worlds: &mut *ctx.worlds,
+            }
+        }
+    }
+}
 
 impl<R: Resource, W: WorldLabel> WorldResMut<'_, R, W> {
     /// # Panics
@@ -439,12 +458,56 @@ pub fn sync_worlds(world: &mut World) {
 
 pub trait MultiworldApp {
     fn add_sync_system<M>(&mut self, system: impl IntoWorldSyncSystem<M>) -> &mut Self;
+
+    fn add_world_systems<W: WorldLabel, M>(
+        &mut self,
+        label: W,
+        schedule: impl ScheduleLabel,
+        systems: impl IntoScheduleConfigs<ScheduleSystem, M>,
+    ) -> &mut Self;
+
+    fn add_world_observer<W: WorldLabel, E: Event, B: Bundle, M>(
+        &mut self,
+        label: W,
+        observer: impl IntoObserverSystem<E, B, M>,
+    ) -> &mut Self;
 }
 
 impl MultiworldApp for App {
     fn add_sync_system<M>(&mut self, system: impl IntoWorldSyncSystem<M>) -> &mut Self {
         let mut resource = self.world_mut().resource_mut::<SyncSystems>();
         resource.add_sync_system(system);
+        self
+    }
+
+    fn add_world_systems<W: WorldLabel, M>(
+        &mut self,
+        label: W,
+        schedule: impl ScheduleLabel,
+        systems: impl IntoScheduleConfigs<ScheduleSystem, M>,
+    ) -> &mut Self {
+        if label.type_id() == TypeId::of::<MainWorld>() {
+            self.add_systems(schedule, systems);
+        } else {
+            let mut resource = self.world_mut().resource_mut::<Worlds>();
+            let world = resource.get_mut(label).unwrap();
+            world.add_systems(schedule, systems);
+        }
+        self
+    }
+
+    fn add_world_observer<W: WorldLabel, E: Event, B: Bundle, M>(
+        &mut self,
+        label: W,
+        observer: impl IntoObserverSystem<E, B, M>,
+    ) -> &mut Self {
+        if label.type_id() == TypeId::of::<MainWorld>() {
+            self.add_observer(observer);
+        } else {
+            let mut resource = self.world_mut().resource_mut::<Worlds>();
+            let world = resource.get_mut(label).unwrap();
+            world.add_observer(observer);
+        }
         self
     }
 }

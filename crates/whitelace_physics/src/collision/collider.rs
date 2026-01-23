@@ -1,8 +1,8 @@
 use bevy::prelude::*;
-use bevy_deterministic::math::FVec3;
-use bridge::{Map, transform::FixedTransform};
 use fixed_math::{Fx, fx};
 use strum::EnumCount;
+use whitelace_core::{map::Map, math::FVec3};
+use whitelace_transform::FixedTransform;
 
 use crate::prelude::CollisionSide;
 

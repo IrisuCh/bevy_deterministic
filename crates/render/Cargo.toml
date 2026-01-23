@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy_deterministic.workspace = true
 bevy = { workspace = true, default-features = true }
-physics.workspace = true
-bridge.workspace = true
+whitelace_core.workspace = true
+whitelace_physics.workspace = true
+whitelace_transform.workspace = true

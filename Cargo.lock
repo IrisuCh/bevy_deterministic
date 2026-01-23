@@ -596,21 +596,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_deterministic"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "cordic",
- "derive_more",
- "fixed_math",
- "indexmap",
- "rustc-hash 2.1.1",
- "serde",
- "strum",
- "strum_macros",
-]
-
-[[package]]
 name = "bevy_dev_tools"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1684,17 +1669,6 @@ dependencies = [
  "futures-io",
  "futures-lite",
  "piper",
-]
-
-[[package]]
-name = "bridge"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_deterministic",
- "fixed_math",
- "indexmap",
- "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -2830,17 +2804,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "impl-trait-for-tuples"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0eb5a3343abf848c0984fe4604b2b105da9539376e24fc0a3b0007411ae4fd9"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "indexmap"
 version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2883,7 +2846,6 @@ name = "input"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bridge",
  "fixed_math",
 ]
 
@@ -3728,18 +3690,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "physics"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_deterministic",
- "bridge",
- "fixed_math",
- "strum",
- "strum_macros",
-]
-
-[[package]]
 name = "pin-project"
 version = "1.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3793,9 +3743,11 @@ name = "plugin"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_deterministic",
- "bridge",
- "sync",
+ "whitelace_core",
+ "whitelace_physics",
+ "whitelace_sync",
+ "whitelace_time",
+ "whitelace_transform",
 ]
 
 [[package]]
@@ -4075,9 +4027,9 @@ name = "render"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_deterministic",
- "bridge",
- "physics",
+ "whitelace_core",
+ "whitelace_physics",
+ "whitelace_transform",
 ]
 
 [[package]]
@@ -4458,16 +4410,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "sync"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_deterministic",
- "bridge",
- "impl-trait-for-tuples",
 ]
 
 [[package]]
@@ -5186,6 +5128,63 @@ dependencies = [
  "serde",
  "thiserror 2.0.17",
  "web-sys",
+]
+
+[[package]]
+name = "whitelace_core"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cordic",
+ "derive_more",
+ "fixed_math",
+ "indexmap",
+ "rustc-hash 2.1.1",
+ "serde",
+ "strum",
+ "strum_macros",
+]
+
+[[package]]
+name = "whitelace_physics"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "fixed_math",
+ "strum",
+ "strum_macros",
+ "whitelace_core",
+ "whitelace_sync",
+ "whitelace_time",
+ "whitelace_transform",
+]
+
+[[package]]
+name = "whitelace_sync"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "whitelace_core",
+]
+
+[[package]]
+name = "whitelace_time"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "fixed_math",
+ "whitelace_core",
+ "whitelace_sync",
+]
+
+[[package]]
+name = "whitelace_transform"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "fixed_math",
+ "whitelace_core",
+ "whitelace_sync",
 ]
 
 [[package]]

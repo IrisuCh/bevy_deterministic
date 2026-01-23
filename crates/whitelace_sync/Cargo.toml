@@ -1,12 +1,10 @@
 [package]
-name = "sync"
+name = "whitelace_sync"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy_deterministic.workspace = true
-bridge.workspace = true
-impl-trait-for-tuples.workspace = true
+whitelace_core.workspace = true
 
 [dependencies.bevy]
 workspace = true

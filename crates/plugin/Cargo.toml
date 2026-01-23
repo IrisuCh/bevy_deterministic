@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy_deterministic.workspace = true
-bridge.workspace = true
-sync.workspace = true
 bevy.workspace = true
+whitelace_core.workspace = true
+whitelace_sync.workspace = true
+whitelace_time.workspace = true
+whitelace_transform.workspace = true
+whitelace_physics.workspace = true

@@ -1,22 +1,24 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/bevy_deterministic",
-    "crates/bridge",
     "crates/fixed_math",
     "crates/input",
-    "crates/physics",
     "crates/plugin",
     "crates/render",
-    "crates/sync",
+    "crates/whitelace_core",
+    "crates/whitelace_physics",
+    "crates/whitelace_sync",
+    "crates/whitelace_time",
+    "crates/whitelace_transform",
 ]
 
 [workspace.dependencies]
 fixed_math = { path = "crates/fixed_math" }
-bevy_deterministic = { path = "crates/bevy_deterministic" }
-bridge = { path = "crates/bridge" }
-sync = { path = "crates/sync" }
-physics = { path = "crates/physics" }
+whitelace_core = { path = "crates/whitelace_core" }
+whitelace_sync = { path = "crates/whitelace_sync" }
+whitelace_physics = { path = "crates/whitelace_physics" }
+whitelace_time = { path = "crates/whitelace_time" }
+whitelace_transform = { path = "crates/whitelace_transform" }
 
 fixed = { version = "1.30.0", features = ["serde"] }
 serde = { version = "1.0.228", features = ["derive"] }
@@ -26,7 +28,6 @@ rustc-hash = "2.1.1"
 indexmap = "2.13.0"
 cordic = "0.1.5"
 derive_more = "2.1.1"
-impl-trait-for-tuples = "0.2.3"
 
 [workspace.dependencies.bevy]
 version = "0.18.0"

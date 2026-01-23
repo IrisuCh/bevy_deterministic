@@ -1,5 +1,5 @@
-use bevy_deterministic::math::{FVec3, Fx};
-use bridge::transform::FixedTransform;
+use whitelace_core::math::{FVec3, Fx};
+use whitelace_transform::FixedTransform;
 
 use crate::collision::obb::{CollisionInfo, Obb};
 
