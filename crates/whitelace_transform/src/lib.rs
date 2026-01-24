@@ -2,7 +2,7 @@
 #![no_std]
 
 use bevy::prelude::*;
-use whitelace_core::main::schedule::{Physics, PreFixedUpdate};
+use whitelace_core::main::schedule::PreFixedUpdate;
 use whitelace_math::{FDir3, FQuat, FVec3, IntoFx};
 use whitelace_sync::{MultiworldApp, SyncTarget, WorldLabel, WorldQuery};
 

@@ -33,7 +33,9 @@ impl<W: WorldLabel> Default for TimePlugin<W> {
 
 impl<W: WorldLabel + Default> Plugin for TimePlugin<W> {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Time>();
+        app.modify_world(W::default(), |world| {
+            world.init_resource::<Time>();
+        });
         app.add_sync_system(sync_time::<W>);
     }
 }

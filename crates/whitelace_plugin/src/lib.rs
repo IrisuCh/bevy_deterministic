@@ -2,7 +2,7 @@
 
 use bevy::app::{App, Plugin};
 use whitelace_physics::PhysicsPlugin;
-use whitelace_sync::{SyncPlugin, WorldLabel};
+use whitelace_sync::{MultiworldApp, SyncPlugin, WorldLabel};
 use whitelace_time::TimePlugin;
 use whitelace_transform::TransformPlugin;
 
@@ -21,6 +21,8 @@ pub struct WhitelacePlugin;
 impl Plugin for WhitelacePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(SyncPlugin);
+        app.add_world(LogicWorld);
+
         app.add_plugins(TimePlugin::<LogicWorld>::default());
         app.add_plugins(TransformPlugin::<LogicWorld>::default());
         app.add_plugins(PhysicsPlugin::<LogicWorld>::default());

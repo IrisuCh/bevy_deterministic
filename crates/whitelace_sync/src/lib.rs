@@ -121,7 +121,13 @@ impl<R: Resource, W: WorldLabel> Deref for WorldResMut<'_, R, W> {
 
 impl<R: Resource, W: WorldLabel> DerefMut for WorldResMut<'_, R, W> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        let mut m = self.get_inner_mut().expect("Resource not found");
+        let mut m = self.get_inner_mut().unwrap_or_else(|| {
+            panic!(
+                "Resource '{}' not found in the world '{}'",
+                core::any::type_name::<R>(),
+                core::any::type_name::<W>()
+            )
+        });
         let mut_ref = m.as_mut();
         unsafe {
             let ptr = mut_ref as *mut R;
@@ -472,6 +478,10 @@ pub trait MultiworldApp {
         label: W,
         observer: impl IntoObserverSystem<E, B, M>,
     ) -> &mut Self;
+
+    fn add_world(&mut self, label: impl WorldLabel) -> &mut Self;
+    fn get_world(&self, label: impl WorldLabel) -> Option<&Subworld>;
+    fn modify_world(&mut self, label: impl WorldLabel, f: impl FnOnce(&mut Subworld)) -> &mut Self;
 }
 
 impl MultiworldApp for App {
@@ -508,6 +518,28 @@ impl MultiworldApp for App {
             let mut resource = self.world_mut().resource_mut::<Worlds>();
             let world = resource.get_mut(label).unwrap();
             world.add_observer(observer);
+        }
+        self
+    }
+
+    fn add_world(&mut self, label: impl WorldLabel) -> &mut Self {
+        let mut resource = self.world_mut().resource_mut::<Worlds>();
+        resource.inner.insert(label.intern(), Subworld::default());
+        self
+    }
+
+    fn get_world(&self, label: impl WorldLabel) -> Option<&Subworld> {
+        self.world()
+            .get_resource::<Worlds>()
+            .and_then(|worlds| worlds.get(label))
+    }
+
+    fn modify_world(&mut self, label: impl WorldLabel, f: impl FnOnce(&mut Subworld)) -> &mut Self {
+        let mut resource = self.world_mut().resource_mut::<Worlds>();
+        if let Some(world) = resource.get_mut(label) {
+            f(world);
+        } else {
+            panic!("World not found");
         }
         self
     }
@@ -549,8 +581,8 @@ impl<'w> MultiworldCommands<'w, '_> {
 pub struct SyncPlugin;
 impl Plugin for SyncPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, sync_worlds);
         app.init_resource::<SyncSystems>();
         app.init_resource::<Worlds>();
+        app.add_systems(Update, sync_worlds);
     }
 }

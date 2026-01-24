@@ -9,6 +9,7 @@ members = [
     "crates/whitelace_tilemap",
     "crates/whitelace_time",
     "crates/whitelace_transform",
+    "crates/example",
 ]
 
 [workspace.dependencies]
