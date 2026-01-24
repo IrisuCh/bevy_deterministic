@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use fixed_math::{Fx, fx};
 use strum::EnumCount;
 use whitelace_core::{map::Map, math::FVec3};
+use whitelace_math::{Fx, fx};
 use whitelace_transform::FixedTransform;
 
 use crate::prelude::CollisionSide;

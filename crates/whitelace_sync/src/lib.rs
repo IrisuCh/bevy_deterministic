@@ -1,7 +1,7 @@
 #![allow(clippy::missing_panics_doc)]
-#![allow(clippy::needless_pass_by_value)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_safety_doc)]
+#![allow(clippy::needless_pass_by_value)]
 #![allow(clippy::iter_without_into_iter)]
 #![allow(dead_code)]
 #![no_std]

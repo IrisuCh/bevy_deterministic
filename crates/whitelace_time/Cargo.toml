@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fixed_math.workspace = true
+whitelace_math.workspace = true
 whitelace_core.workspace = true
 whitelace_sync.workspace = true
 

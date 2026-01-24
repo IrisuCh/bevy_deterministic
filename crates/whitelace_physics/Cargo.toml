@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fixed_math.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
+whitelace_math.workspace = true
 whitelace_core.workspace = true
 whitelace_time.workspace = true
 whitelace_transform.workspace = true

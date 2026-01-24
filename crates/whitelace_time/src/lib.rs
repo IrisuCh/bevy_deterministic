@@ -3,7 +3,7 @@
 #![no_std]
 
 use bevy::prelude::*;
-use fixed_math::{Fx, fx};
+use whitelace_math::{Fx, fx};
 use whitelace_sync::{MultiworldApp, WorldLabel, WorldRes, WorldResMut};
 
 #[derive(Resource, Default)]

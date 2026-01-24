@@ -2,8 +2,8 @@
 #![no_std]
 
 use bevy::prelude::*;
-use fixed_math::{FDir3, FQuat, FVec3, IntoFx};
-use whitelace_core::main::schedule::Physics;
+use whitelace_core::main::schedule::{Physics, PreFixedUpdate};
+use whitelace_math::{FDir3, FQuat, FVec3, IntoFx};
 use whitelace_sync::{MultiworldApp, SyncTarget, WorldLabel, WorldQuery};
 
 pub mod prelude {
@@ -245,7 +245,7 @@ impl<W: WorldLabel + Default> Plugin for TransformPlugin<W> {
     fn build(&self, app: &mut App) {
         app.add_world_systems(
             W::default(),
-            Physics,
+            PreFixedUpdate,
             (sync_fixed_global_transforms, sync_fixed_transforms),
         );
 

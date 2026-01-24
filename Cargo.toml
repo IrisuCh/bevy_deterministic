@@ -1,10 +1,8 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/fixed_math",
-    "crates/input",
-    "crates/plugin",
-    "crates/render",
+    "crates/whitelace_math",
+    "crates/whitelace_plugin",
     "crates/whitelace_core",
     "crates/whitelace_physics",
     "crates/whitelace_sync",
@@ -14,7 +12,8 @@ members = [
 ]
 
 [workspace.dependencies]
-fixed_math = { path = "crates/fixed_math" }
+whitelace_math = { path = "crates/whitelace_math" }
+whitelace_plugin = { path = "crates/whitelace_plugin" }
 whitelace_core = { path = "crates/whitelace_core" }
 whitelace_sync = { path = "crates/whitelace_sync" }
 whitelace_physics = { path = "crates/whitelace_physics" }

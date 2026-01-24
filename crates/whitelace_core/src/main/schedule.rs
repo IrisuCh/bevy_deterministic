@@ -13,7 +13,12 @@ struct ScheduleOrder {
 impl Default for ScheduleOrder {
     fn default() -> Self {
         Self {
-            labels: vec![Physics.intern(), Logic.intern()],
+            labels: vec![
+                Physics.intern(),
+                PreFixedUpdate.intern(),
+                FixedUpdate.intern(),
+                PostFixedUpdate.intern(),
+            ],
         }
     }
 }
@@ -35,7 +40,13 @@ impl FixedSchedule {
 pub struct Physics;
 
 #[derive(ScheduleLabel, Debug, Hash, PartialEq, Eq, Clone)]
-pub struct Logic;
+pub struct PreFixedUpdate;
+
+#[derive(ScheduleLabel, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct FixedUpdate;
+
+#[derive(ScheduleLabel, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct PostFixedUpdate;
 
 pub struct SchedulePlugin;
 impl<I: UserInput> DPlugin<I> for SchedulePlugin {

@@ -14,9 +14,9 @@ use bevy::{
     gizmos::gizmos::Gizmos,
     transform::components::Transform,
 };
-use fixed_math::{FQuat, FVec3, const_fx};
 pub use rigidbody::Rigidbody;
 pub(crate) use rigidbody::{apply_material_friction, apply_velocity};
+use whitelace_math::{FQuat, FVec3, const_fx};
 
 pub mod prelude {
     pub use super::{Rigidbody, collision::prelude::*};

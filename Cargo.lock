@@ -2318,17 +2318,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fixed_math"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "cordic",
- "derive_more",
- "fixed",
- "serde",
-]
-
-[[package]]
 name = "fixedbitset"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2839,14 +2828,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e05c02b5e89bff3b946cedeca278abc628fe811e604f027c45a8aa3cf793d0eb"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "input"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "fixed_math",
 ]
 
 [[package]]
@@ -3739,19 +3720,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
 
 [[package]]
-name = "plugin"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "whitelace_core",
- "whitelace_physics",
- "whitelace_sync",
- "whitelace_tilemap",
- "whitelace_time",
- "whitelace_transform",
-]
-
-[[package]]
 name = "png"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4022,16 +3990,6 @@ name = "regex-syntax"
 version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
-
-[[package]]
-name = "render"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "whitelace_core",
- "whitelace_physics",
- "whitelace_transform",
-]
 
 [[package]]
 name = "renderdoc-sys"
@@ -5138,12 +5096,23 @@ dependencies = [
  "bevy",
  "cordic",
  "derive_more",
- "fixed_math",
  "indexmap",
  "rustc-hash 2.1.1",
  "serde",
  "strum",
  "strum_macros",
+ "whitelace_math",
+]
+
+[[package]]
+name = "whitelace_math"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cordic",
+ "derive_more",
+ "fixed",
+ "serde",
 ]
 
 [[package]]
@@ -5151,11 +5120,24 @@ name = "whitelace_physics"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "fixed_math",
  "strum",
  "strum_macros",
  "whitelace_core",
+ "whitelace_math",
  "whitelace_sync",
+ "whitelace_time",
+ "whitelace_transform",
+]
+
+[[package]]
+name = "whitelace_plugin"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "whitelace_core",
+ "whitelace_physics",
+ "whitelace_sync",
+ "whitelace_tilemap",
  "whitelace_time",
  "whitelace_transform",
 ]
@@ -5185,8 +5167,8 @@ name = "whitelace_time"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "fixed_math",
  "whitelace_core",
+ "whitelace_math",
  "whitelace_sync",
 ]
 
@@ -5195,8 +5177,8 @@ name = "whitelace_transform"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "fixed_math",
  "whitelace_core",
+ "whitelace_math",
  "whitelace_sync",
 ]
 

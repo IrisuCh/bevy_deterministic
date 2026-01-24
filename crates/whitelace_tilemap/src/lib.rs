@@ -6,7 +6,7 @@ mod chunk;
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-use whitelace_core::{main::schedule::Logic, math::Fx};
+use whitelace_core::{main::schedule::FixedUpdate, math::Fx};
 use whitelace_physics::collision::Collider;
 use whitelace_sync::{MultiworldApp, WorldLabel};
 use whitelace_transform::FixedTransform;
@@ -165,7 +165,7 @@ impl<W: WorldLabel + Default> Plugin for TilemapPlugin<W> {
     fn build(&self, app: &mut App) {
         app.add_world_systems(
             W::default(),
-            Logic,
+            FixedUpdate,
             (
                 set_tiles_position,
                 split_by_chunks,
